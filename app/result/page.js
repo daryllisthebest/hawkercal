@@ -1,11 +1,60 @@
 'use client'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 import MacroBar from '@/components/MacroBar'
 import { DISHES, getMealForTime, MEAL_TYPES } from '@/lib/mockData'
 import { addEntry, getTodayStr } from '@/lib/storage'
+
+function QuestionBlock({ question, answer, onSingle, onMulti }) {
+  const isMulti = question.type === 'multi'
+  const selected = isMulti ? (answer || []) : answer
+
+  return (
+    <div>
+      <div className="mb-2">
+        <p className="text-sm font-bold text-gray-900">{question.question}</p>
+        {question.subtitle && (
+          <p className="text-xs text-gray-400 mt-0.5">{question.subtitle}</p>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {question.options.map(opt => {
+          const isSelected = isMulti
+            ? selected.includes(opt.id)
+            : selected === opt.id
+          return (
+            <button
+              key={opt.id}
+              onClick={() => isMulti ? onMulti(question.id, opt.id, question.options) : onSingle(question.id, opt.id)}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.97] ${
+                isSelected
+                  ? 'border-orange-400 bg-orange-50 shadow-sm'
+                  : 'border-gray-100 bg-gray-50 hover:border-orange-200 hover:bg-orange-50/50'
+              }`}
+            >
+              <span className="text-lg flex-shrink-0">{opt.icon}</span>
+              <div className="min-w-0">
+                <div className={`text-xs font-bold leading-tight ${isSelected ? 'text-orange-700' : 'text-gray-800'}`}>
+                  {opt.label}
+                </div>
+                {opt.desc && (
+                  <div className="text-[10px] text-gray-400 leading-tight mt-0.5 truncate">{opt.desc}</div>
+                )}
+              </div>
+              {opt.modifier !== 0 && (
+                <span className={`ml-auto text-[10px] font-black flex-shrink-0 ${opt.modifier > 0 ? 'text-red-400' : 'text-green-500'}`}>
+                  {opt.modifier > 0 ? '+' : ''}{opt.modifier}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 function ResultContent() {
   const params = useSearchParams()
@@ -14,13 +63,64 @@ function ResultContent() {
   const confidence = parseInt(params.get('confidence') || '87', 10)
   const dish = DISHES[dishId] || DISHES['chicken-rice']
 
-  const [showMealPicker, setShowMealPicker] = useState(false)
+  const [answers, setAnswers] = useState({})
   const [selectedMeal, setSelectedMeal] = useState(getMealForTime())
-  const [showAltPicker, setShowAltPicker] = useState(false)
   const [logged, setLogged] = useState(false)
 
-  const confColor = confidence >= 85 ? 'text-green-600 bg-green-50' : confidence >= 65 ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50'
-  const confLabel = confidence >= 85 ? '✓ High confidence' : confidence >= 65 ? '~ Moderate confidence' : '? Low confidence'
+  const hasQuestions = dish.questions?.length > 0
+  const answeredCount = Object.keys(answers).length
+  const allAnswered = hasQuestions && answeredCount >= dish.questions.length
+
+  const { adjustedCalories, totalAdjustment } = useMemo(() => {
+    if (!hasQuestions) return { adjustedCalories: dish.baseCalories, totalAdjustment: 0 }
+    let adj = 0
+    dish.questions.forEach(q => {
+      const ans = answers[q.id]
+      if (!ans) return
+      if (q.type === 'single') {
+        const opt = q.options.find(o => o.id === ans)
+        if (opt) adj += opt.modifier
+      } else {
+        ;(Array.isArray(ans) ? ans : [ans]).forEach(id => {
+          const opt = q.options.find(o => o.id === id)
+          if (opt) adj += opt.modifier
+        })
+      }
+    })
+    return {
+      adjustedCalories: Math.max(dish.baseCalories + adj, 80),
+      totalAdjustment: adj,
+    }
+  }, [answers, dish, hasQuestions])
+
+  const scaleFactor = adjustedCalories / dish.baseCalories
+  const scaledMacros = {
+    protein: Math.round(dish.macros.protein * scaleFactor),
+    carbs: Math.round(dish.macros.carbs * scaleFactor),
+    fat: Math.round(dish.macros.fat * scaleFactor),
+    fiber: Math.round(dish.macros.fiber * scaleFactor),
+  }
+
+  const handleSingle = (qId, optId) => {
+    setAnswers(prev => ({ ...prev, [qId]: optId }))
+  }
+
+  const handleMulti = (qId, optId, options) => {
+    const opt = options.find(o => o.id === optId)
+    setAnswers(prev => {
+      const current = prev[qId] || []
+      if (opt?.exclusive) {
+        return { ...prev, [qId]: current.includes(optId) ? [] : [optId] }
+      }
+      const withoutExclusive = current.filter(id => !options.find(o => o.id === id)?.exclusive)
+      const idx = withoutExclusive.indexOf(optId)
+      if (idx >= 0) {
+        const next = withoutExclusive.filter(id => id !== optId)
+        return { ...prev, [qId]: next }
+      }
+      return { ...prev, [qId]: [...withoutExclusive, optId] }
+    })
+  }
 
   const logIt = () => {
     addEntry({
@@ -28,14 +128,18 @@ function ResultContent() {
       dishId: dish.id,
       name: dish.name,
       emoji: dish.emoji,
-      calories: dish.baseCalories,
-      macros: { ...dish.macros },
+      calories: adjustedCalories,
+      macros: scaledMacros,
       meal: selectedMeal,
-      modifications: ['Standard portion'],
+      modifications: answeredCount > 0 ? ['Refined with questions'] : ['Standard portion'],
     })
     setLogged(true)
     setTimeout(() => router.push('/log'), 1200)
   }
+
+  const confColor = confidence >= 85 ? 'text-green-600 bg-green-50 border-green-200'
+    : confidence >= 65 ? 'text-amber-600 bg-amber-50 border-amber-200'
+    : 'text-red-600 bg-red-50 border-red-200'
 
   if (logged) {
     return (
@@ -43,7 +147,7 @@ function ResultContent() {
         <div className="text-center px-6">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">✅</div>
           <h2 className="text-2xl font-black text-gray-900 mb-2">Logged!</h2>
-          <p className="text-gray-500">Adding {dish.name} to your log…</p>
+          <p className="text-gray-500">Adding <strong>{adjustedCalories} kcal</strong> to your log…</p>
         </div>
       </div>
     )
@@ -64,18 +168,20 @@ function ResultContent() {
       </header>
 
       <div className="max-w-md mx-auto px-4 pt-4 space-y-4">
+
+        {/* ── DISH DETECTION CARD ── */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
               <span>🤖</span> AI Detected
             </div>
-            <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg ${confColor}`}>
-              {confLabel} · {confidence}%
+            <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${confColor}`}>
+              {confidence >= 85 ? '✓' : confidence >= 65 ? '~' : '?'} {confidence}% confident
             </div>
           </div>
 
-          <div className="flex items-center gap-5 mb-5">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-5xl flex-shrink-0 shadow-sm" style={{ backgroundColor: dish.bgColor }}>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-18 h-18 w-[72px] h-[72px] rounded-2xl flex items-center justify-center text-5xl flex-shrink-0 shadow-sm" style={{ backgroundColor: dish.bgColor }}>
               {dish.emoji}
             </div>
             <div className="flex-1 min-w-0">
@@ -87,7 +193,7 @@ function ResultContent() {
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 leading-relaxed mb-4">{dish.description}</p>
+          <p className="text-sm text-gray-500 leading-relaxed mb-3">{dish.description}</p>
 
           <div className="flex flex-wrap gap-2">
             {dish.tags.map(tag => (
@@ -98,23 +204,103 @@ function ResultContent() {
           </div>
         </div>
 
+        {/* ── CALORIE ESTIMATE CARD ── */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-sm font-semibold text-gray-500">Estimated Calories</span>
-            <span className="text-xs text-gray-400">Base estimate</span>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-gray-500">
+              {answeredCount > 0 ? 'Refined Estimate' : hasQuestions ? 'Estimated Range' : 'Estimated Calories'}
+            </span>
+            {totalAdjustment !== 0 && (
+              <span className={`text-xs font-black px-2 py-1 rounded-lg ${
+                totalAdjustment > 0 ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'
+              }`}>
+                {totalAdjustment > 0 ? '+' : ''}{totalAdjustment} kcal from answers
+              </span>
+            )}
           </div>
 
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-6xl font-black text-gray-900 tabular-nums">{dish.baseCalories}</span>
-            <span className="text-xl text-gray-400 font-semibold">kcal</span>
-          </div>
+          {answeredCount === 0 && hasQuestions ? (
+            <div className="flex items-baseline gap-1.5 mb-1">
+              <span className="text-5xl font-black text-gray-900 tabular-nums">
+                {dish.calorieRange.min}–{dish.calorieRange.max}
+              </span>
+              <span className="text-xl text-gray-400 font-semibold">kcal</span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1.5 mb-1">
+              <span className="text-6xl font-black text-orange-500 tabular-nums transition-all">
+                {adjustedCalories}
+              </span>
+              <span className="text-xl text-gray-400 font-semibold">kcal</span>
+            </div>
+          )}
 
-          <h3 className="text-sm font-bold text-gray-700 mb-3">Macronutrients</h3>
-          <MacroBar {...dish.macros} />
+          {answeredCount === 0 && hasQuestions && (
+            <p className="text-xs text-gray-400 mb-3">Answer the questions below to refine this estimate</p>
+          )}
+
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Macronutrients</p>
+            <MacroBar {...scaledMacros} />
+          </div>
         </div>
 
+        {/* ── HIDDEN CALORIES WARNING ── */}
+        {dish.hiddenCalories?.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="text-base">⚠️</span>
+              <span className="text-sm font-bold text-amber-800">Watch out for hidden calories</span>
+            </div>
+            <ul className="space-y-1.5">
+              {dish.hiddenCalories.map(item => (
+                <li key={item} className="flex items-start gap-2 text-xs text-amber-700 leading-snug">
+                  <span className="mt-0.5 flex-shrink-0">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ── ACCURACY QUESTIONS ── */}
+        {hasQuestions && (
+          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center text-base flex-shrink-0">
+                🎯
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Improve Accuracy</h3>
+                <p className="text-xs text-gray-400">
+                  {answeredCount}/{dish.questions.length} answered
+                  {answeredCount === 0 ? ' · calories update as you answer' : ''}
+                </p>
+              </div>
+              {allAnswered && (
+                <div className="ml-auto text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+                  ✓ Done
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-5">
+              {dish.questions.map(q => (
+                <QuestionBlock
+                  key={q.id}
+                  question={q}
+                  answer={answers[q.id]}
+                  onSingle={handleSingle}
+                  onMulti={handleMulti}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── MEAL PICKER ── */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wide">Log as</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Log as</p>
           <div className="grid grid-cols-4 gap-2">
             {MEAL_TYPES.map(m => (
               <button
@@ -133,12 +319,20 @@ function ResultContent() {
           </div>
         </div>
 
+        {/* ── LOG BUTTON ── */}
         <button
           onClick={logIt}
           className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-orange-200 transition-all hover:shadow-orange-300 active:scale-[0.98]"
         >
-          ✅ Log {dish.baseCalories} kcal
+          ✅ Log {adjustedCalories} kcal
         </button>
+
+        {hasQuestions && answeredCount < dish.questions.length && (
+          <p className="text-center text-xs text-gray-400 pb-2">
+            You can log now or answer questions above for a more accurate estimate
+          </p>
+        )}
+
       </div>
 
       <BottomNav />
