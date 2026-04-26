@@ -159,26 +159,6 @@ export default function PricingPage() {
         </div>
 
         {/* Social Proof */}
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-5 border border-orange-200">
-          <div className="flex gap-1 mb-3">
-            {[1, 2, 3, 4, 5].map(i => (
-              <span key={i} className="text-amber-400 text-lg">★</span>
-            ))}
-          </div>
-          <p className="text-sm text-gray-800 leading-relaxed font-medium mb-3">
-            "Finally, an app that knows my food. The weekly AI coaching helped me lose 3kg in a month."
-          </p>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center text-base flex-shrink-0">
-              👨🏽
-            </div>
-            <div className="text-xs">
-              <div className="font-bold text-gray-900">Ahmad K. · Singapore</div>
-              <div className="text-gray-500">HawkerCal Pro user</div>
-            </div>
-          </div>
-        </div>
-
         {/* FAQ */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
