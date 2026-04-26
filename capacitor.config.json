@@ -1,0 +1,28 @@
+{
+  "appId": "com.hawkercal.app",
+  "appName": "HawkerCal AI",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "hostname": "localhost"
+  },
+  "plugins": {
+    "Camera": {
+      "permissions": ["camera", "photos"]
+    }
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "preferredEdgeOfScreen": "automatic"
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": null,
+      "keystorePassword": null,
+      "keystoreAlias": null,
+      "keystoreAliasPassword": null,
+      "releaseType": "APK"
+    }
+  }
+}
