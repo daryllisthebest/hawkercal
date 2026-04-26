@@ -81,26 +81,26 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
 
-      {/* ── HEADER ── */}
-      <header className="sticky top-0 z-50 glass border-b border-orange-100/60">
+      {/* ── HEADER (DARK) ── */}
+      <header className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur border-b border-gray-900/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center text-lg shadow-sm">
               🍜
             </div>
-            <span className="font-extrabold text-gray-900 text-lg tracking-tight">
+            <span className="font-extrabold text-white text-lg tracking-tight">
               HawkerCal <span className="text-orange-500">AI</span>
             </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
-            <a href="#how-it-works" className="text-gray-500 hover:text-gray-900 transition-colors">How It Works</a>
-            <a href="#dishes" className="text-gray-500 hover:text-gray-900 transition-colors">Dishes</a>
-            <a href="#pricing" className="text-gray-500 hover:text-gray-900 transition-colors">Pricing</a>
+            <a href="#how-it-works" className="text-gray-400 hover:text-white transition-colors">How It Works</a>
+            <a href="#dishes" className="text-gray-400 hover:text-white transition-colors">Dishes</a>
+            <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/log" className="hidden md:block text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/log" className="hidden md:block text-sm font-medium text-gray-400 hover:text-white transition-colors">
               Open App
             </Link>
             <Link
@@ -113,67 +113,281 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-orange-50 via-amber-50/30 to-white pt-20 pb-28">
-        <div className="absolute -top-20 -right-20 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-40 -left-20 w-72 h-72 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
+      {/* ── HERO (DARK WITH PHONE MOCKUPS) ── */}
+      <section className="relative overflow-hidden bg-gray-950 pt-16 pb-24 md:pt-32 md:pb-32">
+        {/* Decorative blobs */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
-          {['🍜', '🍚', '🍛', '🥘', '🍢', '🍲', '🧋', '🫓'].map((e, i) => (
-            <span
-              key={i}
-              className="absolute text-5xl opacity-[0.12]"
-              style={{
-                left: `${5 + i * 12}%`,
-                top: `${10 + (i % 4) * 22}%`,
-                animation: `float ${2.5 + (i % 3) * 0.8}s ease-in-out ${i * 0.35}s infinite`,
-              }}
-            >
-              {e}
-            </span>
-          ))}
-        </div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-white border border-orange-200 rounded-full px-4 py-2 text-sm font-semibold text-orange-700 shadow-sm mb-8">
-            <span className="flex gap-1">{FLAGS.map(f => <span key={f} className="text-base">{f}</span>)}</span>
-            <span className="text-gray-300">•</span>
-            Built for Southeast Asian food
-          </div>
+            {/* LEFT COLUMN: Text Content */}
+            <div className="text-white">
+              {/* Flag badge */}
+              <div className="inline-flex items-center gap-2 border border-gray-700 rounded-full px-4 py-2 text-sm font-semibold mb-8">
+                <span className="flex gap-0.5">{FLAGS.map(f => <span key={f} className="text-base">{f}</span>)}</span>
+                <span className="text-gray-600">•</span>
+                <span className="text-gray-400">Built for SEA food</span>
+              </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 leading-[1.05] mb-6 tracking-tight">
-            Know what's in<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500">
-              your hawker bowl.
-            </span>
-          </h1>
+              <h1 className="text-5xl md:text-6xl font-black leading-[1.1] mb-6 tracking-tight">
+                Know what's in<br />
+                your hawker{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">
+                  bowl.
+                </span>
+              </h1>
 
-          <p className="text-xl sm:text-2xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI calorie tracking built for Singapore, Malaysia, Thailand and beyond.{' '}
-            <strong className="text-gray-700 font-semibold">Snap your meal. Log in 10 seconds.</strong>
-          </p>
+              <p className="text-xl text-gray-400 mb-10 leading-relaxed max-w-xl">
+                AI calorie tracking built for Singapore, Malaysia, Thailand and beyond. Snap your meal. Log in 10 seconds.
+              </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
-            <Link
-              href="/scan"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-2xl text-lg font-bold shadow-xl shadow-orange-200 hover:shadow-orange-300 transition-all hover:scale-105 active:scale-95"
-            >
-              📸 Snap Your Meal — It's Free
-            </Link>
-            <a
-              href="#how-it-works"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-orange-300 text-gray-700 hover:text-orange-600 px-8 py-4 rounded-2xl text-lg font-semibold transition-all"
-            >
-              See how it works ↓
-            </a>
-          </div>
+              <div className="flex flex-col sm:flex-row gap-3 mb-10">
+                <Link
+                  href="/scan"
+                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-orange-900/30 transition-all hover:scale-105 active:scale-95 text-lg"
+                >
+                  📸 Snap Your Meal — Free →
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="flex items-center justify-center gap-2 border-2 border-gray-700 hover:border-orange-500 text-gray-300 hover:text-white px-8 py-4 rounded-2xl font-bold transition-all"
+                >
+                  See how it works ↓
+                </a>
+              </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-500">
-            {['Free forever plan', 'No sign-up needed', 'Works offline', 'Data stays on device'].map(t => (
-              <span key={t} className="flex items-center gap-1.5">
-                <span className="text-green-500 font-bold">✓</span> {t}
-              </span>
-            ))}
+              <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                {['Free forever', 'No sign-up', 'Data on device'].map(t => (
+                  <span key={t} className="flex items-center gap-1.5">
+                    <span className="text-green-500">✓</span> {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Phone Mockups */}
+            <div className="relative h-[500px] md:h-[600px] hidden md:flex items-center justify-center">
+              {/* Back phone - rotated left, showing Result screen */}
+              <div
+                className="absolute"
+                style={{
+                  width: '280px',
+                  height: '580px',
+                  left: '20px',
+                  transform: 'rotate(-6deg)',
+                  zIndex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: '#000',
+                    borderRadius: '40px',
+                    border: '12px solid #374151',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  {/* Status bar */}
+                  <div style={{ background: '#111', height: '24px', paddingTop: '6px' }} />
+
+                  {/* Content area - Result screen */}
+                  <div style={{ flex: 1, background: '#1a1a1a', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '8px' }}>🍚</div>
+                    <div style={{ color: '#fff', fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>
+                      Chicken Rice detected
+                    </div>
+
+                    {/* Calorie badge */}
+                    <div
+                      style={{
+                        background: '#f97316',
+                        color: '#fff',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        marginBottom: '16px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      480 kcal
+                    </div>
+
+                    {/* Confidence */}
+                    <div style={{ color: '#9ca3af', fontSize: '12px', marginBottom: '12px' }}>
+                      98% confident
+                    </div>
+
+                    {/* Macro bars */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                      {[
+                        { label: 'P', color: '#ef4444', pct: 45 },
+                        { label: 'C', color: '#eab308', pct: 65 },
+                        { label: 'F', color: '#f97316', pct: 35 },
+                      ].map(m => (
+                        <div key={m.label} style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              height: '32px',
+                              background: m.color,
+                              borderRadius: '8px',
+                              marginBottom: '4px',
+                            }}
+                          />
+                          <div style={{ color: '#9ca3af', fontSize: '11px', textAlign: 'center' }}>
+                            {m.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      style={{
+                        background: '#f97316',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        marginTop: 'auto',
+                      }}
+                    >
+                      Log this meal
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Front phone - slight rotation, showing Log screen */}
+              <div
+                className="absolute"
+                style={{
+                  width: '280px',
+                  height: '580px',
+                  right: '20px',
+                  transform: 'rotate(-3deg)',
+                  zIndex: 2,
+                }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: '#000',
+                    borderRadius: '40px',
+                    border: '12px solid #374151',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  {/* Status bar */}
+                  <div style={{ background: '#111', height: '24px', paddingTop: '6px' }} />
+
+                  {/* Content - Log screen */}
+                  <div style={{ flex: 1, background: '#1a1a1a', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ color: '#fff', fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>
+                      Today's Log
+                    </div>
+
+                    {/* Calorie ring */}
+                    <div
+                      style={{
+                        width: '100px',
+                        height: '100px',
+                        margin: '0 auto 16px',
+                        position: 'relative',
+                      }}
+                    >
+                      <svg
+                        viewBox="0 0 100 100"
+                        style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
+                      >
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#374151" strokeWidth="6" />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="#f97316"
+                          strokeWidth="6"
+                          strokeDasharray="113"
+                          strokeDashoffset="0"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          color: '#f97316',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                        }}
+                      >
+                        760<br />kcal
+                      </div>
+                    </div>
+
+                    {/* Meals */}
+                    <div style={{ space: '8px', flex: 1, overflowY: 'auto' }}>
+                      {[
+                        { emoji: '🍚', name: 'Chicken Rice', cal: '480' },
+                        { emoji: '🧋', name: 'Bubble Tea', cal: '280' },
+                      ].map((meal, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '10px',
+                            background: '#222',
+                            borderRadius: '8px',
+                            marginBottom: '8px',
+                            fontSize: '12px',
+                          }}
+                        >
+                          <span style={{ fontSize: '18px' }}>{meal.emoji}</span>
+                          <span style={{ color: '#e5e7eb', flex: 1 }}>{meal.name}</span>
+                          <span style={{ color: '#9ca3af' }}>{meal.cal}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom nav */}
+                  <div
+                    style={{
+                      background: '#111',
+                      borderTop: '1px solid #374151',
+                      height: '48px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-around',
+                      fontSize: '16px',
+                    }}
+                  >
+                    <span>📊</span>
+                    <span style={{ color: '#f97316', fontSize: '24px' }}>+</span>
+                    <span>⚙️</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -316,6 +530,7 @@ export default function LandingPage() {
             <h2 className="text-4xl font-black text-gray-900 mt-3 mb-4">Simple, honest pricing</h2>
             <p className="text-gray-500 mb-8">Start free. Upgrade when you're ready.</p>
 
+            {/* Toggle */}
             <div className="inline-flex items-center gap-3 bg-gray-100 rounded-xl p-1">
               <button
                 onClick={() => setAnnual(false)}
@@ -333,6 +548,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {/* Free */}
             <div className="rounded-3xl border-2 border-gray-100 p-8">
               <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Free</div>
               <div className="text-5xl font-black text-gray-900 mb-1">S$0</div>
@@ -350,6 +566,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
+            {/* Pro */}
             <div className="rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-white relative overflow-hidden shadow-xl shadow-orange-200">
               <div className="absolute top-4 right-4 bg-white/20 backdrop-blur text-white text-xs font-bold px-2.5 py-1 rounded-full">
                 Most Popular
