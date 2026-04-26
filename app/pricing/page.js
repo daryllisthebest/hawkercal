@@ -4,46 +4,47 @@ import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 
 const FREE_FEATURES = [
-  { icon: '📸', text: '10 AI food scans per day' },
-  { icon: '📅', text: '7-day food history' },
-  { icon: '🔢', text: 'Daily calorie log' },
-  { icon: '📊', text: 'Basic macro breakdown' },
+  { icon: '📸', text: '5 AI food scans per day' },
+  { icon: '📅', text: 'Daily food log' },
+  { icon: '🔢', text: 'Basic calorie estimate' },
 ]
 
 const PRO_FEATURES = [
   { icon: '♾️', text: 'Unlimited AI scans', highlight: true },
-  { icon: '📅', text: 'Full history, no limit', highlight: true },
-  { icon: '🧠', text: 'Weekly AI insights & coaching', highlight: true },
-  { icon: '📤', text: 'Export data to CSV', highlight: true },
+  { icon: '🧠', text: 'Weekly AI insights', highlight: true },
+  { icon: '🔍', text: 'Hidden calories breakdown', highlight: true },
+  { icon: '🍜', text: 'Southeast Asian food database (50+ dishes)', highlight: true },
+  { icon: '🥗', text: 'Healthier meal suggestions', highlight: true },
+  { icon: '⚖️', text: 'Weight goal tracking', highlight: true },
 ]
 
 const COMPARE = [
-  { feature: 'AI food scans', free: '10/day', pro: 'Unlimited' },
-  { feature: 'Food history', free: '7 days', pro: 'Unlimited' },
-  { feature: 'Calorie tracking', free: '✓', pro: '✓' },
-  { feature: 'Macro breakdown', free: 'Basic', pro: 'Full + trends' },
-  { feature: 'Weekly insights', free: '✕', pro: 'AI-powered' },
+  { feature: 'Daily AI scans', free: '5', pro: 'Unlimited' },
+  { feature: 'Daily log', free: '✓', pro: '✓' },
+  { feature: 'Calorie tracking', free: 'Basic', pro: 'Advanced' },
+  { feature: 'Hidden calories breakdown', free: '✕', pro: '✓' },
+  { feature: 'Weekly AI insights', free: '✕', pro: '✓' },
+  { feature: 'Healthier suggestions', free: '✕', pro: '✓' },
+  { feature: 'Weight goal tracking', free: '✕', pro: '✓' },
 ]
 
 const FAQS = [
-  { q: 'Is the free plan really free forever?', a: 'Yes! The free plan has no expiry date and no credit card required.' },
-  { q: 'How accurate is the AI calorie detection?', a: 'Our AI achieves ~98% dish identification accuracy on common SEA hawker foods.' },
-  { q: 'Can I cancel my Pro plan anytime?', a: 'Absolutely. Cancel anytime from your account settings — no questions asked.' },
-  { q: 'Does it work for Malaysian, Thai, Indonesian and Vietnamese food?', a: 'Yes! We support dishes from Singapore, Malaysia, Thailand, Indonesia, and Vietnam.' },
+  { q: 'Is the free plan really free forever?', a: 'Yes! The free plan has no expiry and requires no credit card. All you get is the 5 daily scans and basic daily log.' },
+  { q: 'How accurate is the AI calorie detection?', a: 'Our AI achieves ~98% accuracy on common SEA hawker foods. Weekly insights and hidden calorie breakdowns help refine estimates further.' },
+  { q: 'Can I cancel Pro anytime?', a: 'Absolutely. No questions asked, no hidden fees. Cancel from your account settings whenever you want.' },
+  { q: 'What if I go over 5 scans on the free plan?', a: 'The 6th scan will be blocked. You can upgrade to Pro anytime to unlock unlimited scans.' },
+  { q: 'Which cuisines do you support?', a: 'We specialize in Southeast Asian cuisines: Singapore, Malaysia, Thailand, Indonesia, and Vietnam.' },
 ]
 
 export default function PricingPage() {
-  const [annual, setAnnual] = useState(true)
   const [openFaq, setOpenFaq] = useState(null)
-
-  const monthlyPrice = annual ? 3.99 : 5.99
 
   return (
     <div className="min-h-screen bg-orange-50 pb-28">
 
       <header className="glass border-b border-orange-100/60 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/log" className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 text-gray-600">
+          <Link href="/log" className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 text-gray-600 hover:text-gray-900 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
@@ -53,147 +54,154 @@ export default function PricingPage() {
         </div>
       </header>
 
-      <div className="max-w-md mx-auto px-4 pt-6 space-y-5">
+      <div className="max-w-md mx-auto px-4 pt-8 space-y-6">
 
-        <div className="text-center py-4">
-          <div className="text-5xl mb-3">✨</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">Level up your hawker journey</h2>
-          <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
-            Unlock unlimited scans, AI coaching, and full history to hit your health goals faster.
+        <div className="text-center py-2">
+          <div className="text-6xl mb-4 animate-bounce">🍜</div>
+          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3 leading-tight">
+            Track Smarter,<br />Eat Healthier
+          </h2>
+          <p className="text-gray-600 text-base leading-relaxed max-w-sm mx-auto">
+            Unlimited scans. AI insights. Hidden calorie breakdowns. Everything you need to master your health.
           </p>
         </div>
 
-        <div className="flex justify-center">
-          <div className="inline-flex items-center bg-white border border-gray-200 rounded-2xl p-1 shadow-sm gap-1">
-            <button
-              onClick={() => setAnnual(false)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${!annual ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${annual ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Annual
-              <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full font-black">SAVE 33%</span>
-            </button>
-          </div>
-        </div>
+        <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-black rounded-3xl p-6 text-white overflow-hidden shadow-2xl">
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 rounded-3xl p-6 text-white overflow-hidden shadow-2xl shadow-gray-900/30">
           <div className="relative">
-            <div className="flex items-start justify-between mb-5">
-              <div>
-                <div className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">Pro Plan</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black">S${monthlyPrice}</span>
-                  <span className="text-gray-400">/month</span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-orange-400 to-amber-500 p-0.5 rounded-2xl">
-                <div className="bg-gray-900 rounded-[14px] px-3 py-2 text-xs font-black text-orange-400 text-center">
-                  MOST<br />POPULAR
-                </div>
-              </div>
+            <div className="inline-flex items-center gap-1.5 bg-orange-500/20 border border-orange-400/50 rounded-full px-3 py-1 mb-4">
+              <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
+              <span className="text-xs font-black text-orange-400 uppercase tracking-widest">Most Popular</span>
             </div>
 
-            <div className="space-y-3 mb-6">
+            <div className="mb-6">
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Pro Plan</div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-6xl font-black text-white">S$4.99</span>
+                <span className="text-gray-400 font-semibold">/month</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Cancel anytime · No hidden fees</p>
+            </div>
+
+            <div className="space-y-3 mb-8">
               {PRO_FEATURES.map(f => (
-                <div key={f.text} className="flex items-center gap-3">
-                  <span className="text-sm">{f.icon}</span>
-                  <span className={`text-sm ${f.highlight ? 'text-white font-semibold' : 'text-gray-400'}`}>
-                    {f.text}
-                  </span>
+                <div key={f.text} className="flex items-start gap-3">
+                  <span className="text-lg flex-shrink-0 mt-0.5">{f.icon}</span>
+                  <span className="text-sm text-gray-100 font-medium leading-snug">{f.text}</span>
                 </div>
               ))}
             </div>
 
-            <button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-4 rounded-2xl font-black text-base shadow-lg shadow-orange-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              Start Pro — S${monthlyPrice}/mo
+            <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-black text-base shadow-xl shadow-orange-900/40 transition-all hover:scale-[1.02] active:scale-[0.98] mb-3">
+              Start Tracking Smarter
             </button>
-            <p className="text-center text-gray-500 text-xs mt-3">Cancel anytime · No hidden fees · 7-day free trial</p>
+
+            <p className="text-center text-gray-400 text-xs">7-day free trial included</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Free Plan</div>
-              <div className="text-4xl font-black text-gray-900">S$0</div>
-              <div className="text-sm text-gray-400">Forever free</div>
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <div className="mb-5">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Free Forever</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-black text-gray-900">S$0</span>
+              <span className="text-sm text-gray-500">No credit card needed</span>
             </div>
           </div>
-          <div className="space-y-2.5 mb-5">
+
+          <div className="space-y-3 mb-6">
             {FREE_FEATURES.map(f => (
               <div key={f.text} className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center text-sm flex-shrink-0">{f.icon}</div>
-                <span className="text-sm text-gray-600">{f.text}</span>
+                <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                  {f.icon}
+                </div>
+                <span className="text-sm text-gray-700">{f.text}</span>
               </div>
             ))}
           </div>
-          <Link href="/scan" className="block w-full text-center border-2 border-gray-200 hover:border-orange-300 text-gray-700 hover:text-orange-600 py-3.5 rounded-2xl font-bold transition-all text-sm">
+
+          <Link
+            href="/scan"
+            className="block w-full text-center border-2 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-600 py-3 rounded-2xl font-bold text-sm transition-colors"
+          >
             Continue with Free
           </Link>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 bg-gray-50 border-b border-gray-100">
-            <h3 className="font-bold text-gray-900 text-base">Plan Comparison</h3>
+            <h3 className="font-bold text-gray-900 text-sm">Full Feature Comparison</h3>
           </div>
           <div className="divide-y divide-gray-50">
-            <div className="grid grid-cols-3 px-5 py-3 bg-gray-50/50">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Feature</span>
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wide text-center">Free</span>
-              <span className="text-xs font-bold text-orange-500 uppercase tracking-wide text-center">Pro</span>
+            <div className="grid grid-cols-3 px-5 py-3 bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-wide">
+              <span>Feature</span>
+              <span className="text-center">Free</span>
+              <span className="text-center text-orange-600">Pro</span>
             </div>
             {COMPARE.map(row => (
-              <div key={row.feature} className="grid grid-cols-3 px-5 py-3 items-center">
-                <span className="text-xs text-gray-700 font-medium pr-2">{row.feature}</span>
-                <span className="text-xs text-gray-400 text-center tabular-nums">{row.free}</span>
-                <span className="text-xs text-gray-800 font-semibold text-center tabular-nums">{row.pro}</span>
+              <div key={row.feature} className="grid grid-cols-3 px-5 py-3.5 items-center text-sm">
+                <span className="text-gray-800 font-medium">{row.feature}</span>
+                <span className="text-center text-gray-500 text-xs">{row.free}</span>
+                <span className="text-center font-semibold text-gray-900 text-xs">{row.pro}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-orange-50 rounded-2xl p-4 border border-orange-100">
-          <div className="flex gap-0.5 mb-2">
-            {[1,2,3,4,5].map(i => <span key={i} className="text-amber-400">★</span>)}
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-5 border border-orange-200">
+          <div className="flex gap-1 mb-3">
+            {[1, 2, 3, 4, 5].map(i => (
+              <span key={i} className="text-amber-400 text-lg">★</span>
+            ))}
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed mb-3">
-            "Upgraded to Pro after 3 days on free. The weekly AI coaching alone is worth it!"
+          <p className="text-sm text-gray-800 leading-relaxed font-medium mb-3">
+            "Finally, an app that knows my food. The weekly AI coaching helped me lose 3kg in a month."
           </p>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center text-base">👩🏻</div>
-            <div>
-              <div className="text-xs font-bold text-gray-900">Priya N. · Singapore</div>
-              <div className="text-[10px] text-gray-400">HawkerCal Pro user</div>
+            <div className="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center text-base flex-shrink-0">
+              👨🏽
+            </div>
+            <div className="text-xs">
+              <div className="font-bold text-gray-900">Ahmad K. · Singapore</div>
+              <div className="text-gray-500">HawkerCal Pro user</div>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
-            <h3 className="font-bold text-gray-900 text-base">Frequently Asked Questions</h3>
+            <h3 className="font-bold text-gray-900">Questions?</h3>
           </div>
           <div className="divide-y divide-gray-50">
             {FAQS.map((faq, i) => (
               <div key={i}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-start justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors group"
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50/50 transition-colors"
                 >
-                  <span className="text-sm font-semibold text-gray-800 pr-4 leading-snug">{faq.q}</span>
+                  <span className="text-sm font-semibold text-gray-800 pr-4">{faq.q}</span>
+                  <span className={`text-xl flex-shrink-0 text-gray-400 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>
+                    →
+                  </span>
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 pb-4">
-                    <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
+                  <div className="px-5 pb-4 bg-gray-50/30">
+                    <p className="text-sm text-gray-600 leading-relaxed">{faq.a}</p>
                   </div>
                 )}
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="text-center py-4 space-y-3">
+          <p className="text-sm font-semibold text-gray-700">
+            Still have questions?
+          </p>
+          <p className="text-xs text-gray-500">
+            Email us at support@hawkercal.app
+          </p>
         </div>
 
       </div>

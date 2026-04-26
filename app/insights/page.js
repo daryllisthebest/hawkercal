@@ -85,7 +85,6 @@ export default function InsightsPage() {
 
       <div className="max-w-md mx-auto px-4 pt-5 space-y-4">
 
-        {/* Streak / Summary Row */}
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 text-center">
             <div className="text-3xl font-black text-orange-500 tabular-nums">{streak}</div>
@@ -103,7 +102,6 @@ export default function InsightsPage() {
           </div>
         </div>
 
-        {/* 7-Day Bar Chart + Key Stats */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between mb-5">
             <div>
@@ -118,7 +116,6 @@ export default function InsightsPage() {
             </div>
           </div>
 
-          {/* Bar chart */}
           <div className="flex items-end gap-1.5 h-32 relative mb-2">
             <div
               className="absolute left-0 right-0 border-t-2 border-dashed border-orange-200 pointer-events-none z-10"
@@ -157,7 +154,6 @@ export default function InsightsPage() {
             <span className="text-[10px] text-orange-500 font-semibold">Goal: {goal.toLocaleString()} kcal/day</span>
           </div>
 
-          {/* Highest calorie day callout */}
           {highestDay?.calories > 0 && (
             <div className="mt-4 bg-orange-50 rounded-2xl p-3 flex items-center justify-between">
               <div>
@@ -172,7 +168,6 @@ export default function InsightsPage() {
           )}
         </div>
 
-        {/* Most Frequent Food */}
         {topDishes.length > 0 && (
           <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
             <h2 className="text-base font-bold text-gray-900 mb-1">Most Logged This Week</h2>
@@ -199,7 +194,6 @@ export default function InsightsPage() {
           </div>
         )}
 
-        {/* Drink Contribution */}
         {insights && insights.drinkCal > 0 && (
           <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-1">
@@ -214,7 +208,6 @@ export default function InsightsPage() {
               {insights.drinkPct >= 20 ? ' — more than you might think!' : '.'}
             </p>
 
-            {/* Ring-style visual */}
             <div className="flex items-center gap-5 mb-4">
               <div className="relative w-20 h-20 flex-shrink-0">
                 <svg viewBox="0 0 80 80" className="w-20 h-20 -rotate-90">
@@ -254,7 +247,6 @@ export default function InsightsPage() {
           </div>
         )}
 
-        {/* Biggest Hidden Calorie Source */}
         {insights?.hiddenSource && (
           <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -267,7 +259,6 @@ export default function InsightsPage() {
               <strong>{insights.hiddenSource.kcal}+ hidden kcal</strong> through cooking oils, sauces, and methods.
             </p>
 
-            {/* Visual bar */}
             <div className="space-y-2">
               <div>
                 <div className="flex justify-between text-xs font-semibold text-amber-700 mb-1">
@@ -291,7 +282,6 @@ export default function InsightsPage() {
           </div>
         )}
 
-        {/* Smart AI Suggestions */}
         {insights?.suggestions?.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -306,7 +296,6 @@ export default function InsightsPage() {
           </div>
         )}
 
-        {/* CTA to scan */}
         <div className="bg-gradient-to-br from-gray-950 to-gray-900 rounded-3xl p-5 text-white text-center shadow-lg">
           <p className="text-2xl mb-3">📸</p>
           <h3 className="text-base font-black text-white mb-1.5">Keep tracking to unlock more insights</h3>
