@@ -56,6 +56,7 @@ export default function PricingPage() {
 
       <div className="max-w-md mx-auto px-4 pt-8 space-y-6">
 
+        {/* Hero */}
         <div className="text-center py-2">
           <div className="text-6xl mb-4 animate-bounce">🍜</div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3 leading-tight">
@@ -66,15 +67,19 @@ export default function PricingPage() {
           </p>
         </div>
 
+        {/* Pro Card - Premium */}
         <div className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-black rounded-3xl p-6 text-white overflow-hidden shadow-2xl">
+          {/* Glow effect */}
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative">
+            {/* Most Popular Badge */}
             <div className="inline-flex items-center gap-1.5 bg-orange-500/20 border border-orange-400/50 rounded-full px-3 py-1 mb-4">
               <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
               <span className="text-xs font-black text-orange-400 uppercase tracking-widest">Most Popular</span>
             </div>
 
+            {/* Price */}
             <div className="mb-6">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Pro Plan</div>
               <div className="flex items-baseline gap-2">
@@ -84,6 +89,7 @@ export default function PricingPage() {
               <p className="text-xs text-gray-500 mt-2">Cancel anytime · No hidden fees</p>
             </div>
 
+            {/* Features Grid */}
             <div className="space-y-3 mb-8">
               {PRO_FEATURES.map(f => (
                 <div key={f.text} className="flex items-start gap-3">
@@ -93,6 +99,7 @@ export default function PricingPage() {
               ))}
             </div>
 
+            {/* CTA Button */}
             <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-black text-base shadow-xl shadow-orange-900/40 transition-all hover:scale-[1.02] active:scale-[0.98] mb-3">
               Start Tracking Smarter
             </button>
@@ -101,6 +108,7 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Free Plan Card */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
           <div className="mb-5">
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Free Forever</div>
@@ -129,6 +137,7 @@ export default function PricingPage() {
           </Link>
         </div>
 
+        {/* Comparison Table */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 bg-gray-50 border-b border-gray-100">
             <h3 className="font-bold text-gray-900 text-sm">Full Feature Comparison</h3>
@@ -149,6 +158,7 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Social Proof */}
         <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-5 border border-orange-200">
           <div className="flex gap-1 mb-3">
             {[1, 2, 3, 4, 5].map(i => (
@@ -169,6 +179,7 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* FAQ */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <h3 className="font-bold text-gray-900">Questions?</h3>
@@ -195,6 +206,7 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Final CTA */}
         <div className="text-center py-4 space-y-3">
           <p className="text-sm font-semibold text-gray-700">
             Still have questions?
