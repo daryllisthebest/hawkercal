@@ -392,25 +392,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TRUST BAR ── */}
-      <section className="bg-gray-950 text-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { val: '50,000+', label: 'SEA dishes in database', color: 'text-orange-400' },
-              { val: '98%', label: 'Detection accuracy', color: 'text-amber-400' },
-              { val: '6', label: 'Countries supported', color: 'text-yellow-400' },
-              { val: '4.8 ★', label: 'Average user rating', color: 'text-orange-400' },
-            ].map(s => (
-              <div key={s.label}>
-                <div className={`text-3xl font-black ${s.color}`}>{s.val}</div>
-                <div className="text-sm text-gray-400 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="py-24 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
