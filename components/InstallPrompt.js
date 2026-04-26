@@ -6,12 +6,26 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isIOS, setIsIOS] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
       return
+    }
+
+    // Check if dismissed recently
+    const dismissed = typeof window !== 'undefined' ? localStorage.getItem('pwa-prompt-dismissed') : null
+    if (dismissed) {
+      const daysSinceDismissed = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24)
+      if (daysSinceDismissed < 7) {
+        setIsDismissed(true)
+        return
+      }
     }
 
     // Check for iOS
@@ -47,21 +61,15 @@ export default function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false)
+    setIsDismissed(true)
     // Don't show again for 7 days
-    localStorage.setItem('pwa-prompt-dismissed', Date.now().toString())
-  }
-
-  if (isInstalled) {
-    return null
-  }
-
-  // Check if dismissed recently
-  const dismissed = localStorage.getItem('pwa-prompt-dismissed')
-  if (dismissed) {
-    const daysSinceDismissed = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24)
-    if (daysSinceDismissed < 7) {
-      return null
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pwa-prompt-dismissed', Date.now().toString())
     }
+  }
+
+  if (!mounted || isInstalled || isDismissed) {
+    return null
   }
 
   // iOS Install Instructions
