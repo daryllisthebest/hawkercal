@@ -153,7 +153,6 @@ export default function LogPage() {
 
       <div className="max-w-md mx-auto px-4 pt-5 space-y-4">
 
-        {/* Date Navigation */}
         <div className="flex items-center justify-between">
           <button
             onClick={() => setViewDate(dateOffset(viewDate, -1))}
@@ -184,7 +183,6 @@ export default function LogPage() {
           </button>
         </div>
 
-        {/* Greeting & Motivation */}
         {isToday && totalCal > 0 && (
           <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-200/40 rounded-2xl p-4 text-center">
             <p className="text-sm font-bold text-gray-900">{greeting}! 👋</p>
@@ -192,7 +190,6 @@ export default function LogPage() {
           </div>
         )}
 
-        {/* Main Calorie Status Card */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-1">
             <CalorieRing consumed={totalCal} goal={goal} size={140} />
@@ -214,35 +211,13 @@ export default function LogPage() {
           </div>
         </div>
 
-        {/* Macro Breakdown */}
         {totalCal > 0 && (
           <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Macro Breakdown</p>
-            <div className="space-y-3">
-              {[
-                { label: 'Protein', val: totalMacros.protein, unit: 'g', color: 'from-blue-400 to-blue-600' },
-                { label: 'Carbs', val: totalMacros.carbs, unit: 'g', color: 'from-orange-400 to-orange-600' },
-                { label: 'Fat', val: totalMacros.fat, unit: 'g', color: 'from-yellow-400 to-yellow-600' },
-                { label: 'Fiber', val: totalMacros.fiber, unit: 'g', color: 'from-green-400 to-green-600' },
-              ].map(m => (
-                <div key={m.label}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-gray-600">{m.label}</span>
-                    <span className="text-xs font-black text-gray-900 tabular-nums">{m.val}g</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${m.color}`}
-                      style={{ width: `${Math.min((m.val / (m.label === 'Protein' ? 100 : m.label === 'Carbs' ? 250 : m.label === 'Fat' ? 65 : 30)) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MacroBar {...totalMacros} />
           </div>
         )}
 
-        {/* AI Insights Card */}
         {totalCal > 0 && (
           <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200/40 rounded-3xl p-5 space-y-4">
             <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide">🤖 AI Insights</p>
@@ -272,7 +247,6 @@ export default function LogPage() {
           </div>
         )}
 
-        {/* Meals by Category */}
         {byMeal.length > 0 ? (
           byMeal.map(meal => (
             <div key={meal.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">

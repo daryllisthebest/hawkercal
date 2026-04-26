@@ -169,7 +169,6 @@ function ResultContent() {
 
       <div className="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-        {/* ── DISH DETECTION CARD ── */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
@@ -204,7 +203,6 @@ function ResultContent() {
           </div>
         </div>
 
-        {/* ── CALORIE ESTIMATE CARD ── */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-gray-500">
@@ -245,7 +243,6 @@ function ResultContent() {
           </div>
         </div>
 
-        {/* ── HIDDEN CALORIES WARNING ── */}
         {dish.hiddenCalories?.length > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2.5">
@@ -263,7 +260,6 @@ function ResultContent() {
           </div>
         )}
 
-        {/* ── ACCURACY QUESTIONS ── */}
         {hasQuestions && (
           <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-5">
@@ -298,7 +294,6 @@ function ResultContent() {
           </div>
         )}
 
-        {/* ── MEAL PICKER ── */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Log as</p>
           <div className="grid grid-cols-4 gap-2">
@@ -319,7 +314,6 @@ function ResultContent() {
           </div>
         </div>
 
-        {/* ── LOG BUTTON ── */}
         <button
           onClick={logIt}
           className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-orange-200 transition-all hover:shadow-orange-300 active:scale-[0.98]"
