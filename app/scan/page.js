@@ -1,11 +1,11 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
-import { DISHES, FEATURED_DISH_IDS, mockDetect } from '@/lib/mockData'
+import { DISHES, mockDetect } from '@/lib/mockData'
 
-const QUICK_PICKS = FEATURED_DISH_IDS.map(id => DISHES[id]).filter(Boolean)
+const ALL_DISHES = Object.values(DISHES)
 
 const TIPS = [
   'For best results, photograph the dish from above 📸',
@@ -20,6 +20,17 @@ export default function ScanPage() {
   const [preview, setPreview] = useState(null)
   const [analyzeMsg, setAnalyzeMsg] = useState('Scanning your meal…')
   const [tipIdx] = useState(() => Math.floor(Math.random() * TIPS.length))
+  const [search, setSearch] = useState('')
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return ALL_DISHES
+    return ALL_DISHES.filter(d =>
+      d.name.toLowerCase().includes(q) ||
+      (d.nameLocal && d.nameLocal.toLowerCase().includes(q)) ||
+      (d.tags && d.tags.some(t => t.toLowerCase().includes(q)))
+    )
+  }, [search])
 
   const startAnalysis = (imgUrl) => {
     setPhase('analyzing')
@@ -58,7 +69,6 @@ export default function ScanPage() {
   return (
     <div className="min-h-screen bg-orange-50 pb-24">
 
-      {/* Header */}
       <header className="glass border-b border-orange-100/60 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/log" className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 text-gray-600 hover:text-gray-900 transition-colors">
@@ -75,6 +85,7 @@ export default function ScanPage() {
 
         {phase === 'idle' && (
           <>
+            {/* Camera / upload zone */}
             <div
               onDragOver={e => e.preventDefault()}
               onDrop={handleDrop}
@@ -120,31 +131,83 @@ export default function ScanPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 justify-center text-xs text-gray-400 mb-8">
+            <div className="flex items-center gap-2 justify-center text-xs text-gray-400 mb-6">
               <span>Supports JPG, PNG, HEIC, WEBP</span>
               <span>·</span>
               <span>Max 20MB</span>
             </div>
 
-            <div className="flex items-center gap-3 mb-5">
+            {/* Divider */}
+            <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Or pick from popular</span>
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Or search a dish</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {QUICK_PICKS.map(dish => (
+            {/* Search bar */}
+            <div className="relative mb-4">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search 45 dishes… e.g. laksa, pho, chicken"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-2xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+              />
+              {search && (
                 <button
-                  key={dish.id}
-                  onClick={() => handleQuickPick(dish.id)}
-                  className="bg-white rounded-2xl p-3 text-left border border-gray-100 hover:border-orange-300 hover:shadow-md hover:shadow-orange-50 transition-all duration-200 active:scale-95 group"
+                  onClick={() => setSearch('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600"
                 >
-                  <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{dish.emoji}</div>
-                  <div className="text-xs font-bold text-gray-800 leading-tight mb-0.5 line-clamp-2">{dish.name}</div>
-                  <div className="text-xs font-black text-orange-500">~{dish.baseCalories} kcal</div>
+                  ✕
                 </button>
-              ))}
+              )}
             </div>
+
+            {/* Results count */}
+            <p className="text-xs text-gray-400 mb-3 px-1">
+              {search ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${search}"` : `All ${ALL_DISHES.length} detectable dishes`}
+            </p>
+
+            {/* Dish list */}
+            {filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-4xl mb-3">🤔</div>
+                <p className="text-gray-500 text-sm font-medium">No dish found for "{search}"</p>
+                <p className="text-gray-400 text-xs mt-1">Try a different name or snap a photo instead</p>
+              </div>
+            ) : (
+              <div className="space-y-2 mb-6">
+                {filtered.map(dish => (
+                  <button
+                    key={dish.id}
+                    onClick={() => handleQuickPick(dish.id)}
+                    className="w-full bg-white rounded-2xl px-4 py-3 flex items-center gap-4 border border-gray-100 hover:border-orange-300 hover:shadow-sm hover:shadow-orange-50 transition-all duration-150 active:scale-[0.99] text-left"
+                  >
+                    <span className="text-3xl flex-shrink-0">{dish.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-gray-900 text-sm leading-tight">{dish.name}</div>
+                      {dish.nameLocal && (
+                        <div className="text-xs text-gray-400 mt-0.5">{dish.nameLocal}</div>
+                      )}
+                      {dish.tags && (
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          {dish.tags.map(t => (
+                            <span key={t} className="text-[10px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded-full font-medium">{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-sm font-black text-orange-500">~{dish.baseCalories}</div>
+                      <div className="text-[10px] text-gray-400">kcal</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
 
