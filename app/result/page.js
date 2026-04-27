@@ -195,10 +195,10 @@ function ResultContent() {
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 leading-relaxed mb-3">{dish.description}</p>
+          <p className="text-sm text-gray-500 leading-relaxed mb-3">{dish.description || dish.name}</p>
 
           <div className="flex flex-wrap gap-2">
-            {dish.tags.map(tag => (
+            {(dish.tags || []).map(tag => (
               <span key={tag} className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
                 {tag}
               </span>
@@ -220,7 +220,7 @@ function ResultContent() {
             )}
           </div>
 
-          {answeredCount === 0 && hasQuestions ? (
+          {answeredCount === 0 && hasQuestions && dish.calorieRange ? (
             <div className="flex items-baseline gap-1.5 mb-1">
               <span className="text-5xl font-black text-gray-900 tabular-nums">
                 {dish.calorieRange.min}–{dish.calorieRange.max}
