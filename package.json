@@ -13,6 +13,7 @@
     "cap:sync": "npx cap sync"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@capacitor/camera": "^8.1.0",
     "@capacitor/filesystem": "^8.1.2",
     "next": "14.2.5",
