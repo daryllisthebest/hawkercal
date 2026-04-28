@@ -13,7 +13,8 @@ const TIPS = [
 
 export default function ScanPage() {
   const router = useRouter()
-  const fileRef = useRef(null)
+  const cameraRef = useRef(null)
+  const galleryRef = useRef(null)
   const [phase, setPhase] = useState('idle')
   const [preview, setPreview] = useState(null)
   const [analyzeMsg, setAnalyzeMsg] = useState('Scanning your meal…')
@@ -80,22 +81,30 @@ export default function ScanPage() {
 
         {phase === 'idle' && (
           <>
-            {/* Camera / upload zone */}
+            {/* Hidden inputs — separate so each triggers the right picker */}
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={e => handleFile(e.target.files?.[0])}
+            />
+            <input
+              ref={galleryRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => handleFile(e.target.files?.[0])}
+            />
+
+            {/* Drop zone (tapping the zone opens gallery) */}
             <div
               onDragOver={e => e.preventDefault()}
               onDrop={handleDrop}
-              onClick={() => fileRef.current?.click()}
+              onClick={() => galleryRef.current?.click()}
               className="relative bg-white border-2 border-dashed border-orange-300 rounded-3xl p-8 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/50 transition-all duration-200 active:scale-[0.99] mb-4 group"
             >
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={e => handleFile(e.target.files?.[0])}
-              />
-
               <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -105,24 +114,30 @@ export default function ScanPage() {
 
               <h2 className="text-xl font-black text-gray-900 mb-2">Snap Your Meal</h2>
               <p className="text-gray-500 text-sm mb-5">
-                Take a photo or upload from your gallery.<br />
+                Take a new photo or choose one from your gallery.<br />
                 <span className="font-semibold text-orange-600">AI identifies the dish instantly.</span>
               </p>
 
               <div className="flex gap-3 justify-center">
-                <div className="flex items-center gap-1.5 bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-orange-200">
+                <button
+                  onClick={e => { e.stopPropagation(); cameraRef.current?.click() }}
+                  className="flex items-center gap-1.5 bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-orange-200 active:scale-95 transition-transform"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth={2} />
                   </svg>
                   Take Photo
-                </div>
-                <div className="flex items-center gap-1.5 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold">
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); galleryRef.current?.click() }}
+                  className="flex items-center gap-1.5 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-transform"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Upload
-                </div>
+                  Gallery
+                </button>
               </div>
 
               <div className="mt-4 text-xs text-gray-400 flex items-center justify-center gap-1">
