@@ -43,14 +43,21 @@ export async function POST(request) {
             },
             {
               type: 'text',
-              text: `You are a Southeast Asian food and drink expert. Look at this photo carefully.
+              text: `You are a Southeast Asian hawker food expert. Look at this photo carefully and identify the dish.
 
-Describe exactly what you see in 2-3 sentences:
+Answer these questions in 3–4 sentences:
 1. Is this a DRINK or a FOOD item?
-2. What is the dish or drink called? Use the local name if you know it.
-3. What are the key visual clues — container type, colour, ingredients, how it is presented?
+2. What is the exact dish name? Be specific — e.g. "chicken chop" not just "chicken".
+3. What plate/container is it served on? (round white plate, styrofoam box, bowl, cup, etc.)
+4. List every visible component: the protein, any sauce, any sides (fries, rice, veg, eggs, etc.).
 
-Be specific and honest. If it is a cup of coffee or tea, say so clearly.`,
+Important cues to look for:
+- A round white plate with a flat piece of pan-fried or grilled CHICKEN covered in brown/black pepper/mushroom sauce + crinkle-cut or shoestring FRIES + mixed vegetables (corn, peas, carrots) = CHICKEN CHOP (kopitiam western).
+- Same plate but with a crumbed PORK cutlet instead of chicken = PORK CHOP.
+- A flat FISH fillet (battered or crumbed) + fries = FISH AND CHIPS.
+- A styrofoam cup or ceramic mug with warm brown opaque liquid = KOPI or TEH (coffee or tea), NOT any food.
+- Dry stir-fried ingredients in a wok/takeaway box coated in red chilli oil with no rice = MALA XIANG GUO.
+- White coconut rice + bright red sambal + small fish + egg = NASI LEMAK.`,
             },
           ],
         },
@@ -78,8 +85,13 @@ Reply with ONLY valid JSON, no markdown:
 Rules:
 - dishId must be one of the IDs above (the part before the colon)
 - confidence is 0–100
-- If the description mentions coffee or tea in a cup, use "kopi" or "teh"
-- If the description mentions a drink, use the closest drink ID`,
+- If the description mentions chicken with sauce + fries + veg on a white plate → "chicken-chop"
+- If the description mentions crumbed pork cutlet + fries → "pork-chop"
+- If the description mentions battered/crumbed fish + fries → "fish-and-chips"
+- If the description mentions coffee, tea, or a warm drink in a cup → "kopi" or "teh"
+- If the description mentions mala stir-fry in a box/bowl with chilli oil and no rice → "mala-xiang-guo"
+- If the description mentions mala hot pot with broth → "mala-hotpot"
+- Do NOT match a plated western meal (chicken/pork/fish + fries) to any noodle, rice or spicy stir-fry dish`,
         },
       ],
     })
