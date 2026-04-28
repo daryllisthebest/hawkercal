@@ -40,9 +40,20 @@ Rules:
 - dishId must be one of the IDs listed above (left of the colon)
 - confidence is 0–100 (your certainty level)
 - If unclear, pick the closest match and set confidence below 65
-- For black carrot cake / chai tow kueh, use "carrot-cake"
-- For white carrot cake, use "carrot-cake"
-- For minced pork noodles / bak chor mee, use "bak-chor-mee"`
+
+Visual identification guide (use these cues carefully):
+- NASI LEMAK: white/slightly yellow coconut rice + bright red/orange sambal sauce + small anchovies (ikan bilis) + peanuts + boiled or fried egg; often in a styrofoam box or banana leaf. NOT rendang.
+- RENDANG: dark brown dry meat (beef or chicken) with no visible rice unless plated; the meat is coated in thick dark spice paste, almost no liquid. NOT nasi lemak.
+- CARROT CAKE (black): dark brown/black cubes of radish cake stir-fried with egg and dark sauce on a flat plate. NOT a Western dessert.
+- CARROT CAKE (white): white/pale cubes of radish cake with egg, no dark sauce.
+- CHAR KWAY TEOW: dark flat wide rice noodles stir-fried with cockles, egg and bean sprouts.
+- CHICKEN RICE: poached or roasted chicken slices on plain white rice with clear broth and chilli-ginger sauces on the side.
+- BAK CHOR MEE: dry noodles with minced pork, pork slices, mushrooms and vinegar-chilli sauce.
+- LAKSA: creamy orange coconut soup with thick bee hoon noodles, tofu puffs and prawns.
+- HOKKIEN MEE: yellow and white noodles braised in dark prawn stock, not dry.
+- BEE HOON: thin white vermicelli noodles (much thinner than kway teow).
+- CHWEE KUEH: small white steamed rice cups topped with preserved radish (chai poh).
+- WANTON MEE: thin yellow egg noodles dry-tossed with char siew and wanton dumplings.`
 
   try {
     const response = await client.messages.create({
