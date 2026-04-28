@@ -17,6 +17,7 @@ export default function ScanPage() {
   const galleryRef = useRef(null)
   const [phase, setPhase] = useState('idle')
   const [preview, setPreview] = useState(null)
+  const [pendingFile, setPendingFile] = useState(null)
   const [analyzeMsg, setAnalyzeMsg] = useState('Scanning your meal…')
   const [tipIdx] = useState(() => Math.floor(Math.random() * TIPS.length))
 
@@ -48,8 +49,16 @@ export default function ScanPage() {
 
   const handleFile = (file) => {
     if (!file || !file.type.startsWith('image/')) return
-    setPreview(URL.createObjectURL(file))
-    startAnalysis(file)
+    const url = URL.createObjectURL(file)
+    setPreview(url)
+    setPendingFile(file)
+    setPhase('confirm')
+  }
+
+  const handleRetake = () => {
+    setPreview(null)
+    setPendingFile(null)
+    setPhase('idle')
   }
 
   const handleDrop = (e) => {
@@ -170,6 +179,39 @@ export default function ScanPage() {
               </svg>
             </Link>
           </>
+        )}
+
+        {phase === 'confirm' && (
+          <div className="flex flex-col items-center pt-6">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Confirm your photo</p>
+
+            <div className="w-full rounded-3xl overflow-hidden mb-5 shadow-xl shadow-orange-100 ring-4 ring-orange-100 bg-black" style={{ maxHeight: '55vw', minHeight: 220 }}>
+              <img
+                src={preview}
+                alt="Selected meal"
+                className="w-full h-full object-cover"
+                style={{ maxHeight: '55vw', minHeight: 220 }}
+              />
+            </div>
+
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              Is this the right photo? Tap <span className="font-bold text-gray-800">Analyse</span> to identify the dish.
+            </p>
+
+            <button
+              onClick={() => startAnalysis(pendingFile)}
+              className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-base shadow-lg shadow-orange-200 active:scale-95 transition-transform mb-3"
+            >
+              Analyse This Dish →
+            </button>
+
+            <button
+              onClick={handleRetake}
+              className="w-full bg-white text-gray-600 py-3.5 rounded-2xl font-semibold text-sm border border-gray-200 active:scale-95 transition-transform"
+            >
+              Choose a Different Photo
+            </button>
+          </div>
         )}
 
         {phase === 'analyzing' && (
