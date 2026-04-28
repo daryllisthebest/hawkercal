@@ -28,7 +28,9 @@ export async function POST(request) {
 
   const client = new Anthropic()
 
-  const prompt = `You are a Southeast Asian hawker food expert. Identify the dish in this photo.
+  const prompt = `You are a Southeast Asian hawker food expert. Identify what is shown in this photo.
+
+FIRST: determine if this is a DRINK or a FOOD item.
 
 Match it to exactly one dish ID from this list:
 ${DISH_LIST}
@@ -41,19 +43,28 @@ Rules:
 - confidence is 0–100 (your certainty level)
 - If unclear, pick the closest match and set confidence below 65
 
-Visual identification guide (use these cues carefully):
-- NASI LEMAK: white/slightly yellow coconut rice + bright red/orange sambal sauce + small anchovies (ikan bilis) + peanuts + boiled or fried egg; often in a styrofoam box or banana leaf. NOT rendang.
-- RENDANG: dark brown dry meat (beef or chicken) with no visible rice unless plated; the meat is coated in thick dark spice paste, almost no liquid. NOT nasi lemak.
-- CARROT CAKE (black): dark brown/black cubes of radish cake stir-fried with egg and dark sauce on a flat plate. NOT a Western dessert.
-- CARROT CAKE (white): white/pale cubes of radish cake with egg, no dark sauce.
-- CHAR KWAY TEOW: dark flat wide rice noodles stir-fried with cockles, egg and bean sprouts.
-- CHICKEN RICE: poached or roasted chicken slices on plain white rice with clear broth and chilli-ginger sauces on the side.
-- BAK CHOR MEE: dry noodles with minced pork, pork slices, mushrooms and vinegar-chilli sauce.
-- LAKSA: creamy orange coconut soup with thick bee hoon noodles, tofu puffs and prawns.
-- HOKKIEN MEE: yellow and white noodles braised in dark prawn stock, not dry.
-- BEE HOON: thin white vermicelli noodles (much thinner than kway teow).
-- CHWEE KUEH: small white steamed rice cups topped with preserved radish (chai poh).
-- WANTON MEE: thin yellow egg noodles dry-tossed with char siew and wanton dumplings.`
+DRINKS — identify these first before considering food:
+- KOPI (use "kopi"): warm brown milky coffee in a white styrofoam cup or ceramic mug at a kopitiam. The liquid is opaque, warm brown/caramel colour. This is the MOST COMMON kopitiam drink.
+- TEH (use "teh"): similar to kopi but slightly more golden/amber, also in styrofoam or ceramic cup. Milk tea.
+- TEH TARIK (use "teh-tarik"): frothy pulled milk tea, often with a foamy top, usually in a tall glass or cup.
+- MILO DINOSAUR (use "milo-dinosaur"): dark brown iced drink with dry chocolate powder heaped on top.
+- BUBBLE TEA (use "bubble-tea"): clear plastic sealed cup with tapioca pearls visible at the bottom.
+- BANDUNG (use "bandung"): bright pink/rose-coloured cold drink.
+- SUGARCANE JUICE (use "sugarcane-juice"): pale yellow-green juice in a plastic cup.
+- THAI ICED TEA (use "thai-milk-tea"): bright orange iced drink with milk layer.
+
+KEY RULE: A white styrofoam cup with warm brown/caramel opaque liquid = KOPI or TEH. Never YOU TIAO. Never any food item.
+
+FOOD visual guide:
+- NASI LEMAK: white coconut rice + bright red sambal + ikan bilis + egg; often in styrofoam box.
+- RENDANG: dark brown dry meat coated in thick spice paste. Almost no liquid.
+- CARROT CAKE: dark or white cubes of radish cake stir-fried with egg on a flat plate.
+- CHICKEN RICE: chicken slices on white rice with clear broth and chilli on the side.
+- BAK CHOR MEE: dry noodles with minced pork, mushrooms and vinegar-chilli sauce.
+- LAKSA: creamy orange coconut soup with thick noodles, tofu puffs and prawns.
+- YOU TIAO: long golden-brown deep-fried dough sticks. A solid fried food item, NOT any liquid.
+- CHWEE KUEH: small white steamed rice cups topped with preserved radish.
+- WANTON MEE: thin yellow noodles dry-tossed with char siew slices.`
 
   try {
     const response = await client.messages.create({
