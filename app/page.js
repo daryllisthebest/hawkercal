@@ -45,33 +45,6 @@ const STEPS = [
   { emoji: '📊', step: '04', title: 'Track & Improve', desc: 'View your daily log, weekly trends, and personalised insights' },
 ]
 
-const TESTIMONIALS = [
-  {
-    avatar: '👨🏽',
-    name: 'Ahmad F.',
-    handle: '@ahmadfit.sg',
-    location: 'Singapore',
-    text: 'Finally an app that actually knows what Char Kway Teow is! Every other calorie tracker made me search and guess manually. This nailed it first try.',
-    stars: 5,
-  },
-  {
-    avatar: '👩🏻',
-    name: 'Sarah L.',
-    handle: '@sarahkl',
-    location: 'Kuala Lumpur',
-    text: "Been using HawkerCal for 3 weeks and down 2.5kg. The portion questions make such a difference — it's not just generic calories anymore.",
-    stars: 5,
-  },
-  {
-    avatar: '👩🏽',
-    name: 'Nat W.',
-    handle: '@natbkk',
-    location: 'Bangkok',
-    text: 'Love that it knows the difference between Pad Thai and Pad See Ew! Western apps always get Thai food wrong. This one is spot-on.',
-    stars: 5,
-  },
-]
-
 const FLAGS = ['🇸🇬', '🇲🇾', '🇹🇭', '🇮🇩', '🇻🇳', '🇵🇭']
 
 export default function LandingPage() {
@@ -468,35 +441,6 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{f.title}</h3>
                 <p className="text-gray-500 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-24 bg-orange-50/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <span className="text-sm font-bold text-orange-500 uppercase tracking-widest">User Love</span>
-            <h2 className="text-4xl font-black text-gray-900 mt-3 mb-4">Hawker fans across SEA love it</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
-              <div key={t.name} className="bg-white rounded-3xl p-6 shadow-sm shadow-orange-100 border border-orange-100/50 hover:shadow-md hover:shadow-orange-100 transition-shadow">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.stars }).map((_, i) => (
-                    <span key={i} className="text-amber-400">★</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-5 text-sm">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">{t.avatar}</div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-400">{t.location} · {t.handle}</div>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
