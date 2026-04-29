@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { Suspense, useState, useMemo } from 'react'
+import { Suspense, useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
@@ -69,6 +69,12 @@ function ResultContent() {
   const [answers, setAnswers] = useState({})
   const [selectedMeal, setSelectedMeal] = useState(getMealForTime())
   const [logged, setLogged] = useState(false)
+  const [scanPhoto, setScanPhoto] = useState(null)
+
+  useEffect(() => {
+    const photo = sessionStorage.getItem('lastScanPhoto')
+    if (photo) setScanPhoto(photo)
+  }, [])
 
   const hasQuestions = dish.questions?.length > 0
   const answeredCount = Object.keys(answers).length
@@ -172,7 +178,13 @@ function ResultContent() {
 
       <div className="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+          {scanPhoto && (
+            <div className="w-full h-52 bg-black">
+              <img src={scanPhoto} alt="Your meal" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
               <span>🤖</span> AI Detected
@@ -203,6 +215,7 @@ function ResultContent() {
                 {tag}
               </span>
             ))}
+          </div>
           </div>
         </div>
 

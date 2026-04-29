@@ -22,6 +22,7 @@ export default function ScanPage() {
   const [tipIdx] = useState(() => Math.floor(Math.random() * TIPS.length))
 
   const startAnalysis = async (file) => {
+    if (preview) sessionStorage.setItem('lastScanPhoto', preview)
     setPhase('analyzing')
     setAnalyzeMsg('Scanning your meal…')
 
