@@ -197,10 +197,18 @@ function applyConfidenceOverrides(result) {
   ]
 
   const starch = result.visual_inventory?.starch?.toLowerCase() || ''
+  const sides = result.visual_inventory?.sides?.toLowerCase() || ''
   const dish = result.dish?.toLowerCase() || ''
   const isNoodleDish = noodleDishes.some(n => dish.includes(n))
   const hasNoNoodles = !starch.includes('noodle') && !starch.includes('vermicelli')
-  const hasFries = starch.includes('fries')
+
+  // Broad fries detection — catches any way the model might describe fried potatoes
+  const hasFries = starch.includes('fries') || starch.includes('chips') ||
+    starch.includes('crinkle') || starch.includes('potato')
+
+  // Kopitiam western veg side — corn + pea + carrot mix is a unique signature
+  const hasWesternVeg = sides.includes('corn') || sides.includes('pea') ||
+    (sides.includes('carrot') && sides.includes('mix'))
 
   // Rule 1: Noodle dish detected but no noodles in visual inventory
   if (isNoodleDish && hasNoNoodles) {
@@ -209,9 +217,9 @@ function applyConfidenceOverrides(result) {
     result.override_reason = 'Noodle dish detected but no noodles found in visual inventory'
   }
 
-  // Rule 2: Fries present → deterministically force Kopitiam Western
-  // Crinkle-cut fries in a Singapore hawker context = kopitiam western, no exceptions
-  if (hasFries) {
+  // Rule 2: Fries OR kopitiam western veg → deterministically force Kopitiam Western
+  // Crinkle-cut fries or corn/pea/carrot mix in a Singapore hawker context = kopitiam western
+  if (hasFries || hasWesternVeg) {
     const protein = result.visual_inventory?.protein?.toLowerCase() || ''
     if (protein.includes('fish') || protein.includes('fillet') || protein.includes('battered')) {
       result.dish = 'Fish & Chips'
@@ -223,7 +231,7 @@ function applyConfidenceOverrides(result) {
     result.category = 'Kopitiam Western'
     result.confidence = 85
     result.needsConfirmation = false
-    result.override_reason = 'Fries detected — forced to Kopitiam Western dish based on protein'
+    result.override_reason = 'Fries/western veg detected — forced to Kopitiam Western dish based on protein'
   }
 
   // Rule 3: Any confidence below 70 must show confirmation
