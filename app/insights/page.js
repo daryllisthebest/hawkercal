@@ -76,10 +76,10 @@ export default function InsightsPage() {
 
       <header className="glass border-b border-orange-100/60 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
             <span className="text-xl">📊</span>
             <h1 className="font-bold text-gray-900">Weekly Insights</h1>
-          </div>
+          </Link>
           <Link href="/pricing" className="text-xs bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm">
             Upgrade ✨
           </Link>

@@ -144,10 +144,10 @@ export default function LogPage() {
 
       <header className="glass border-b border-orange-100/60 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
             <span className="text-xl">🍜</span>
             <span className="font-black text-gray-900">HawkerCal <span className="text-orange-500">AI</span></span>
-          </div>
+          </Link>
           <Link href="/pricing" className="w-8 h-8 flex items-center justify-center">
             <span className="text-xs bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold px-2 py-1 rounded-lg">PRO</span>
           </Link>
