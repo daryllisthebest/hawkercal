@@ -209,16 +209,21 @@ function applyConfidenceOverrides(result) {
     result.override_reason = 'Noodle dish detected but no noodles found in visual inventory'
   }
 
-  // Rule 2: Fries present → inject Kopitiam Western alternatives
-  if (hasFries && result.category !== 'Kopitiam Western') {
-    result.confidence = Math.min(result.confidence, 50)
-    result.needsConfirmation = true
-    result.alternatives = [
-      { dish: 'Chicken Chop', calories: 780, reason: 'Crinkle fries + brown gravy + mixed veg is classic kopitiam western' },
-      { dish: 'Pork Chop', calories: 820, reason: 'Same plating style as chicken chop' },
-      { dish: 'Fish & Chips', calories: 710, reason: 'Common kopitiam western with fries' },
-      ...(result.alternatives || []).slice(0, 1),
-    ]
+  // Rule 2: Fries present → deterministically force Kopitiam Western
+  // Crinkle-cut fries in a Singapore hawker context = kopitiam western, no exceptions
+  if (hasFries) {
+    const protein = result.visual_inventory?.protein?.toLowerCase() || ''
+    if (protein.includes('fish') || protein.includes('fillet') || protein.includes('battered')) {
+      result.dish = 'Fish & Chips'
+    } else if (protein.includes('pork')) {
+      result.dish = 'Pork Chop'
+    } else {
+      result.dish = 'Chicken Chop'
+    }
+    result.category = 'Kopitiam Western'
+    result.confidence = 85
+    result.needsConfirmation = false
+    result.override_reason = 'Fries detected — forced to Kopitiam Western dish based on protein'
   }
 
   // Rule 3: Any confidence below 70 must show confirmation
