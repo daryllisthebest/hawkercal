@@ -479,7 +479,7 @@ export default function LandingPage() {
               <div className="text-5xl font-black text-gray-900 mb-1">S$0</div>
               <div className="text-gray-400 text-sm mb-8">Forever free, no credit card</div>
               <ul className="space-y-3 mb-8">
-                {['10 AI scans per day', '7-day food history', 'Daily calorie log', 'Basic macros'].map(f => (
+                {['3 AI scans per day', '7-day food history', 'Daily calorie log', 'Basic macros'].map(f => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
                     <span className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xs font-bold">✓</span>
                     {f}
