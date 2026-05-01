@@ -189,26 +189,31 @@ function resolveDishId(dishName) {
 }
 
 // Change 2 — Post-processing confidence overrides
-function applyConfidenceOverrides(result) {
+// rawText = full model response string, scanned as a safety net when fields are misfiled
+function applyConfidenceOverrides(result, rawText = '') {
   const noodleDishes = [
     'mee goreng', 'laksa', 'hokkien mee', 'char kway teow',
     'pad thai', 'bak chor mee', 'wonton noodle', 'mee rebus',
     'mee siam', 'prawn noodle',
   ]
 
+  // Scan the entire inventory object AND raw response — catches keywords in any field
+  const inventoryStr = JSON.stringify(result.visual_inventory || {}).toLowerCase()
+  const rawLower = rawText.toLowerCase()
+  const everywhere = inventoryStr + ' ' + rawLower
+
   const starch = result.visual_inventory?.starch?.toLowerCase() || ''
-  const sides = result.visual_inventory?.sides?.toLowerCase() || ''
   const dish = result.dish?.toLowerCase() || ''
   const isNoodleDish = noodleDishes.some(n => dish.includes(n))
   const hasNoNoodles = !starch.includes('noodle') && !starch.includes('vermicelli')
 
-  // Broad fries detection — catches any way the model might describe fried potatoes
-  const hasFries = starch.includes('fries') || starch.includes('chips') ||
-    starch.includes('crinkle') || starch.includes('potato')
+  // Fries: check every field + raw text for any potato/fries phrasing
+  const hasFries = everywhere.includes('fries') || everywhere.includes('crinkle') ||
+    everywhere.includes('chips') || everywhere.includes('potato')
 
-  // Kopitiam western veg side — corn + pea + carrot mix is a unique signature
-  const hasWesternVeg = sides.includes('corn') || sides.includes('pea') ||
-    (sides.includes('carrot') && sides.includes('mix'))
+  // Kopitiam western veg: corn or peas anywhere in response is a unique signature
+  const hasWesternVeg = everywhere.includes('corn') || everywhere.includes(' peas') ||
+    everywhere.includes('pea,') || everywhere.includes('mixed veg')
 
   // Rule 1: Noodle dish detected but no noodles in visual inventory
   if (isNoodleDish && hasNoNoodles) {
@@ -346,7 +351,7 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
     if (!jsonMatch) throw new Error('No JSON in response')
 
     let result = JSON.parse(jsonMatch[0])
-    result = applyConfidenceOverrides(result)
+    result = applyConfidenceOverrides(result, text)
 
     const dishId = resolveDishId(result.dish) || Object.keys(DISHES)[0]
     if (!DISHES[dishId]) throw new Error('Unknown dishId: ' + dishId)
