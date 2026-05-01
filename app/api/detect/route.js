@@ -62,13 +62,15 @@ FEATURES: <1–2 unique visual identifiers that distinguish this from similar di
 
 Critical cues:
 - Warm opaque brown liquid in a cup/mug = DRINK (kopi or teh), never a food
+- Large bone-in PORK RIBS submerged in a clear or pale yellow/milky broth in a deep white ceramic bowl = BAK KUT TEH — NOT bun cha, not any noodle dish
 - Flat pan-fried chicken + brown sauce + crinkle fries + mixed veg on round white plate = Chicken Chop (kopitiam western)
 - Crumbed pork cutlet + fries on white plate = Pork Chop
 - Battered/crumbed flat fish fillet + fries = Fish and Chips
 - White coconut rice mound + bright red sambal + ikan bilis + half egg = Nasi Lemak
 - Dark soy braised chicken/pork on white rice = Soy Sauce Chicken Rice or Char Siew Rice
 - Dry red chilli-oil coated stir-fry in box with no rice = Mala Xiang Guo
-- Noodles in clear/milky broth with fishballs = Fishball Noodles / Mee Pok`,
+- Noodles in clear/milky broth with fishballs = Fishball Noodles / Mee Pok
+- Bun Cha = Vietnamese dish with grilled pork patties + rice noodles + dipping broth — NOT a bowl of pork ribs in soup`,
             },
           ],
         },
@@ -100,8 +102,10 @@ Instructions:
 - Dark soy braised chicken on rice = soy-sauce-chicken-rice
 - Char siew (red-glazed pork) on rice = char-siew-rice
 - Crumbed pork + fries = pork-chop; battered fish + fries = fish-and-chips
+- Large bone-in pork ribs in a clear or pale broth in a deep ceramic bowl = bak-kut-teh (never bun-cha or any Vietnamese dish)
 - Dry red chilli stir-fry in box (no rice, no broth) = mala-xiang-guo
 - Do NOT match a plated western meal to any noodle, rice, or curry dish
+- Do NOT match a soup bowl with large pork ribs to any Vietnamese dish
 - Set confidence lower (40–60) when the report is ambiguous or the photo is unclear
 
 Reply with ONLY valid JSON, no markdown:
