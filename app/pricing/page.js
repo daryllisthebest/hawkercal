@@ -7,7 +7,7 @@ import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 
 const FREE_FEATURES = [
-  { icon: '📸', text: '5 AI food scans per day' },
+  { icon: '📸', text: '3 AI food scans per day' },
   { icon: '📅', text: 'Daily food log' },
   { icon: '🔢', text: 'Basic calorie estimate' },
 ]
@@ -22,7 +22,7 @@ const PRO_FEATURES = [
 ]
 
 const COMPARE = [
-  { feature: 'Daily AI scans', free: '5', pro: 'Unlimited' },
+  { feature: 'Daily AI scans', free: '3', pro: 'Unlimited' },
   { feature: 'Daily log', free: '✓', pro: '✓' },
   { feature: 'Calorie tracking', free: 'Basic', pro: 'Advanced' },
   { feature: 'Hidden calories breakdown', free: '✕', pro: '✓' },
@@ -32,10 +32,10 @@ const COMPARE = [
 ]
 
 const FAQS = [
-  { q: 'Is the free plan really free forever?', a: 'Yes! The free plan has no expiry and requires no credit card. All you get is the 5 daily scans and basic daily log.' },
+  { q: 'Is the free plan really free forever?', a: 'Yes! The free plan has no expiry and requires no credit card. All you get is the 3 daily scans and basic daily log.' },
   { q: 'How accurate is the AI calorie detection?', a: 'Our AI achieves ~98% accuracy on common SEA hawker foods. Weekly insights and hidden calorie breakdowns help refine estimates further.' },
   { q: 'Can I cancel Pro anytime?', a: 'Absolutely. No questions asked, no hidden fees. Cancel from your account settings whenever you want.' },
-  { q: 'What if I go over 5 scans on the free plan?', a: 'The 6th scan will be blocked. You can upgrade to Pro anytime to unlock unlimited scans.' },
+  { q: 'What if I go over 3 scans on the free plan?', a: 'The 4th scan will be blocked. You can upgrade to Pro anytime to unlock unlimited scans.' },
   { q: 'Which cuisines do you support?', a: 'We specialize in Southeast Asian cuisines: Singapore, Malaysia, Thailand, Indonesia, and Vietnam.' },
 ]
 
