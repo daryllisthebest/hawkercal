@@ -301,9 +301,13 @@ PROTEIN: OTHER`,
       return Response.json({ dishId: drinkId, confidence: 82 })
     }
 
-    // ── MAIN DETECTION: full visual inventory with Opus ───────────────────────
+    // ── MAIN DETECTION: Haiku (free) or Opus (Pro) ───────────────────────────
+    const isPro = request.headers.get('x-user-tier') === 'pro'
+    const mainModel = isPro ? 'claude-opus-4-7' : 'claude-haiku-4-5-20251001'
+    console.log('Main model:', mainModel, isPro ? '(Pro)' : '(Free)')
+
     const response = await client.messages.create({
-      model: 'claude-opus-4-7',
+      model: mainModel,
       max_tokens: 700,
       system: `You are an expert Southeast Asian hawker food identifier specialising in Singapore and Malaysia cuisine.
 
