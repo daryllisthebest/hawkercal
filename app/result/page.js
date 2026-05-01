@@ -8,7 +8,7 @@ import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 import MacroBar from '@/components/MacroBar'
 import { DISHES, getMealForTime, MEAL_TYPES } from '@/lib/mockData'
-import { addEntry, getTodayStr } from '@/lib/storage'
+import { addEntry, getTodayStr, getCustomDishes } from '@/lib/storage'
 
 function QuestionBlock({ question, answer, onSingle, onMulti }) {
   const isMulti = question.type === 'multi'
@@ -64,8 +64,8 @@ function ResultContent() {
   const router = useRouter()
   const dishId = params.get('dish') || 'chicken-rice'
   const confidence = parseInt(params.get('confidence') || '87', 10)
-  const dish = DISHES[dishId] || DISHES['chicken-rice']
 
+  const [dish, setDish] = useState(() => DISHES[dishId] || DISHES['chicken-rice'])
   const [answers, setAnswers] = useState({})
   const [selectedMeal, setSelectedMeal] = useState(getMealForTime())
   const [logged, setLogged] = useState(false)
@@ -75,6 +75,13 @@ function ResultContent() {
     const photo = sessionStorage.getItem('lastScanPhoto')
     if (photo) setScanPhoto(photo)
   }, [])
+
+  useEffect(() => {
+    if (!DISHES[dishId]) {
+      const found = getCustomDishes().find(d => d.id === dishId)
+      if (found) setDish(found)
+    }
+  }, [dishId])
 
   const hasQuestions = dish.questions?.length > 0
   const answeredCount = Object.keys(answers).length
