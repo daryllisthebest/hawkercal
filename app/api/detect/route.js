@@ -244,6 +244,27 @@ function applyConfidenceOverrides(result, rawText = '') {
     result.needsConfirmation = true
   }
 
+  // Rule 4: Drink result contradicts solid food evidence — model hallucinated
+  const drinkKeywords = ['tea', 'kopi', 'teh', 'coffee', 'juice', 'milk tea', 'bubble', 'milo', 'bandung', 'sugarcane', 'iced']
+  const isDrinkResult = drinkKeywords.some(k => dish.includes(k))
+  const solidFoodEvidence = ['plate', 'bowl', 'chicken', 'pork', 'fish', 'rice', 'noodle', 'fries', 'potato', 'egg', 'prawn', 'crinkle', 'cutlet', 'gravy']
+  const hasSolidFood = solidFoodEvidence.some(f => everywhere.includes(f))
+  if (isDrinkResult && hasSolidFood) {
+    // Model named a drink but the scene clearly has food — use protein to pick best guess
+    if (everywhere.includes('fish') || everywhere.includes('fillet')) {
+      result.dish = 'Fish & Chips'
+    } else if (everywhere.includes('pork')) {
+      result.dish = 'Pork Chop'
+    } else if (everywhere.includes('chicken')) {
+      result.dish = 'Chicken Chop'
+    } else if (everywhere.includes('rice')) {
+      result.dish = 'Hainanese Chicken Rice'
+    }
+    result.confidence = 60
+    result.needsConfirmation = true
+    result.override_reason = 'Drink result rejected — solid food evidence found in visual inventory'
+  }
+
   return result
 }
 
