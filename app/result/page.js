@@ -337,6 +337,13 @@ function ResultContent() {
           ✅ Log {adjustedCalories} kcal
         </button>
 
+        <button
+          onClick={() => router.push('/glossary')}
+          className="w-full bg-white text-gray-500 py-3 rounded-2xl text-sm font-semibold border border-gray-200 hover:border-orange-300 hover:text-orange-500 transition-all active:scale-[0.98]"
+        >
+          Wrong dish? Pick the correct one →
+        </button>
+
         {hasQuestions && answeredCount < dish.questions.length && (
           <p className="text-center text-xs text-gray-400 pb-2">
             You can log now or answer questions above for a more accurate estimate
