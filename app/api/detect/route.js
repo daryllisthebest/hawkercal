@@ -1,7 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { DISHES } from '@/lib/mockData'
 
-// Change 3 — Dish taxonomy used by the prompt and for category-level disambiguation
 const DISH_TAXONOMY = {
   'Kopitiam Western': {
     visual_signature: 'crinkle-cut fries, fried protein cutlet, brown gravy, mixed corn/carrot/pea veg, white oval plate',
@@ -40,7 +39,6 @@ const DISH_TAXONOMY = {
   },
 }
 
-// Build taxonomy reference string included in every prompt
 const TAXONOMY_REF = Object.entries(DISH_TAXONOMY)
   .map(([cat, data]) => {
     const dishes = data.dishes.map(d => `    - ${d.name}: ${d.cues}`).join('\n')
@@ -48,7 +46,6 @@ const TAXONOMY_REF = Object.entries(DISH_TAXONOMY)
   })
   .join('\n\n')
 
-// Full enriched dish list for dishes not covered by the taxonomy
 const DISH_LIST = Object.values(DISHES)
   .map(d => {
     const name = `${d.name}${d.nameLocal ? ` (${d.nameLocal})` : ''}`
@@ -58,9 +55,7 @@ const DISH_LIST = Object.values(DISHES)
   })
   .join('\n')
 
-// Name → dish ID lookup (covers taxonomy names + full database aliases)
 const DISH_NAME_TO_ID = {
-  // Kopitiam Western
   'chicken chop': 'chicken-chop',
   'pork chop': 'pork-chop',
   'fish & chips': 'fish-and-chips',
@@ -68,7 +63,6 @@ const DISH_NAME_TO_ID = {
   'fish n chips': 'fish-and-chips',
   'chicken cutlet rice': 'chicken-rice',
   'french fries': 'fries',
-  // Noodle dishes
   'char kway teow': 'char-kway-teow',
   'char kuay teow': 'char-kway-teow',
   'mee goreng': 'mee-goreng',
@@ -87,7 +81,6 @@ const DISH_NAME_TO_ID = {
   'bee hoon': 'bee-hoon',
   'rice vermicelli': 'bee-hoon',
   'pad thai': 'pad-thai',
-  // Rice dishes
   'hainanese chicken rice': 'chicken-rice',
   'chicken rice': 'chicken-rice',
   'nasi lemak': 'nasi-lemak',
@@ -102,9 +95,7 @@ const DISH_NAME_TO_ID = {
   'economy rice': 'cai-png',
   'mixed rice': 'cai-png',
   'com tam': 'com-tam',
-  // Soups & broths
   'bak kut teh': 'bak-kut-teh',
-  'fish head curry': 'chilli-crab', // closest match in DB
   'tom yum': 'tom-yum',
   'soto ayam': 'soto-ayam',
   'pho': 'pho',
@@ -112,7 +103,6 @@ const DISH_NAME_TO_ID = {
   'mala hot pot': 'mala-hotpot',
   'mala hotpot': 'mala-hotpot',
   'mala xiang guo': 'mala-xiang-guo',
-  // Malay / Indian
   'rendang': 'rendang',
   'satay': 'satay',
   'roti prata': 'roti-prata',
@@ -121,7 +111,6 @@ const DISH_NAME_TO_ID = {
   'gado gado': 'gado-gado',
   'green curry': 'green-curry',
   'pad krapow': 'pad-krapow',
-  // Breakfast / snacks
   'kaya toast': 'kaya-toast',
   'soft boiled eggs': 'soft-boiled-eggs',
   'half boiled eggs': 'soft-boiled-eggs',
@@ -135,22 +124,17 @@ const DISH_NAME_TO_ID = {
   'sunny side up egg': 'sunny-side-up',
   'ondeh ondeh': 'ondeh-ondeh',
   'onde onde': 'ondeh-ondeh',
-  // Vietnamese / other SEA
   'banh mi': 'banh-mi',
   'bun cha': 'bun-cha',
   'spring rolls': 'spring-rolls',
   'adobo': 'adobo',
   'sinigang': 'sinigang',
   'sisig': 'sisig',
-  // Seafood
   'chilli crab': 'chilli-crab',
   'chili crab': 'chilli-crab',
-  // Desserts
   'ice kachang': 'ice-kachang',
-  'ice kaching': 'ice-kachang',
   'chendol': 'chendol',
   'ice cream bread': 'ice-cream-bread',
-  // Drinks
   'kopi': 'kopi',
   'teh': 'teh',
   'milo': 'milo-dinosaur',
@@ -167,29 +151,18 @@ const DISH_NAME_TO_ID = {
 function resolveDishId(dishName) {
   if (!dishName) return null
   const lower = dishName.toLowerCase().trim()
-
-  // 1. Direct name lookup
   if (DISH_NAME_TO_ID[lower]) return DISH_NAME_TO_ID[lower]
-
-  // 2. Exact match on dish ID (hyphens → spaces)
   const byId = Object.keys(DISHES).find(id => id.replace(/-/g, ' ') === lower)
   if (byId) return byId
-
-  // 3. Exact match on dish.name
   const byName = Object.values(DISHES).find(d => d.name.toLowerCase() === lower)
   if (byName) return byName.id
-
-  // 4. Partial contains match
   const partial = Object.values(DISHES).find(d =>
     lower.includes(d.name.toLowerCase()) || d.name.toLowerCase().includes(lower)
   )
   if (partial) return partial.id
-
   return null
 }
 
-// Change 2 — Post-processing confidence overrides
-// rawText = full model response string, scanned as a safety net when fields are misfiled
 function applyConfidenceOverrides(result, rawText = '') {
   const noodleDishes = [
     'mee goreng', 'laksa', 'hokkien mee', 'char kway teow',
@@ -197,38 +170,30 @@ function applyConfidenceOverrides(result, rawText = '') {
     'mee siam', 'prawn noodle',
   ]
 
-  // Scan the entire inventory object AND raw response — catches keywords in any field
   const inventoryStr = JSON.stringify(result.visual_inventory || {}).toLowerCase()
   const rawLower = rawText.toLowerCase()
   const everywhere = inventoryStr + ' ' + rawLower
-
   const starch = result.visual_inventory?.starch?.toLowerCase() || ''
   const dish = result.dish?.toLowerCase() || ''
+
   const isNoodleDish = noodleDishes.some(n => dish.includes(n))
   const hasNoNoodles = !starch.includes('noodle') && !starch.includes('vermicelli')
-
-  // Fries: check every field + raw text for any potato/fries phrasing
   const hasFries = everywhere.includes('fries') || everywhere.includes('crinkle') ||
     everywhere.includes('chips') || everywhere.includes('potato')
-
-  // Kopitiam western veg: corn or peas anywhere in response is a unique signature
   const hasWesternVeg = everywhere.includes('corn') || everywhere.includes(' peas') ||
     everywhere.includes('pea,') || everywhere.includes('mixed veg')
 
-  // Rule 1: Noodle dish detected but no noodles in visual inventory
   if (isNoodleDish && hasNoNoodles) {
     result.confidence = Math.min(result.confidence, 35)
     result.needsConfirmation = true
     result.override_reason = 'Noodle dish detected but no noodles found in visual inventory'
   }
 
-  // Rule 2: Fries OR kopitiam western veg → deterministically force Kopitiam Western
-  // Crinkle-cut fries or corn/pea/carrot mix in a Singapore hawker context = kopitiam western
   if (hasFries || hasWesternVeg) {
-    const protein = result.visual_inventory?.protein?.toLowerCase() || ''
-    if (protein.includes('fish') || protein.includes('fillet') || protein.includes('battered')) {
+    const protein = everywhere
+    if (everywhere.includes('fish') || everywhere.includes('fillet') || everywhere.includes('battered')) {
       result.dish = 'Fish & Chips'
-    } else if (protein.includes('pork')) {
+    } else if (everywhere.includes('pork')) {
       result.dish = 'Pork Chop'
     } else {
       result.dish = 'Chicken Chop'
@@ -236,34 +201,10 @@ function applyConfidenceOverrides(result, rawText = '') {
     result.category = 'Kopitiam Western'
     result.confidence = 85
     result.needsConfirmation = false
-    result.override_reason = 'Fries/western veg detected — forced to Kopitiam Western dish based on protein'
+    result.override_reason = 'Fries/western veg detected — forced to Kopitiam Western'
   }
 
-  // Rule 3: Any confidence below 70 must show confirmation
-  if (result.confidence < 70) {
-    result.needsConfirmation = true
-  }
-
-  // Rule 4: Drink result contradicts solid food evidence — model hallucinated
-  const drinkKeywords = ['tea', 'kopi', 'teh', 'coffee', 'juice', 'milk tea', 'bubble', 'milo', 'bandung', 'sugarcane', 'iced']
-  const isDrinkResult = drinkKeywords.some(k => dish.includes(k))
-  const solidFoodEvidence = ['plate', 'bowl', 'chicken', 'pork', 'fish', 'rice', 'noodle', 'fries', 'potato', 'egg', 'prawn', 'crinkle', 'cutlet', 'gravy']
-  const hasSolidFood = solidFoodEvidence.some(f => everywhere.includes(f))
-  if (isDrinkResult && hasSolidFood) {
-    // Model named a drink but the scene clearly has food — use protein to pick best guess
-    if (everywhere.includes('fish') || everywhere.includes('fillet')) {
-      result.dish = 'Fish & Chips'
-    } else if (everywhere.includes('pork')) {
-      result.dish = 'Pork Chop'
-    } else if (everywhere.includes('chicken')) {
-      result.dish = 'Chicken Chop'
-    } else if (everywhere.includes('rice')) {
-      result.dish = 'Hainanese Chicken Rice'
-    }
-    result.confidence = 60
-    result.needsConfirmation = true
-    result.override_reason = 'Drink result rejected — solid food evidence found in visual inventory'
-  }
+  if (result.confidence < 70) result.needsConfirmation = true
 
   return result
 }
@@ -271,17 +212,14 @@ function applyConfidenceOverrides(result, rawText = '') {
 export async function POST(request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     const ids = Object.keys(DISHES)
-    const dishId = ids[Math.floor(Math.random() * ids.length)]
-    return Response.json({ dishId, confidence: 72 })
+    return Response.json({ dishId: ids[Math.floor(Math.random() * ids.length)], confidence: 72 })
   }
 
   let imageBase64, mediaType
-
   try {
     const formData = await request.formData()
     const file = formData.get('image')
     if (!file) return Response.json({ error: 'No image provided' }, { status: 400 })
-
     const bytes = await file.arrayBuffer()
     imageBase64 = Buffer.from(bytes).toString('base64')
     mediaType = file.type || 'image/jpeg'
@@ -290,9 +228,80 @@ export async function POST(request) {
   }
 
   const client = new Anthropic()
+  const imageBlock = { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } }
 
   try {
-    // Change 1 — Single-step structured visual inventory approach
+    // ── PRE-CHECK (Haiku, ~10 tokens) ────────────────────────────────────────
+    // Binary gate: settle FOOD vs DRINK and fries presence before spending Opus tokens
+    const preCheckResponse = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 60,
+      messages: [{
+        role: 'user',
+        content: [
+          imageBlock,
+          {
+            type: 'text',
+            text: `Answer these three questions with one word each:
+1. Is this solid FOOD on a plate/bowl, or a DRINK in a cup/glass/can? → FOOD or DRINK
+2. Are crinkle-cut fries or potato chips visible on the plate? → YES or NO
+3. Main protein (if food): CHICKEN, PORK, FISH, or OTHER
+
+Reply in this exact format (no other text):
+TYPE: FOOD
+FRIES: NO
+PROTEIN: OTHER`,
+          },
+        ],
+      }],
+    })
+
+    const pre = preCheckResponse.content[0].text.trim()
+    const preIsDrink = pre.includes('TYPE: DRINK')
+    const preHasFries = pre.includes('FRIES: YES')
+    const preProtein = pre.includes('PROTEIN: FISH') ? 'fish'
+      : pre.includes('PROTEIN: PORK') ? 'pork'
+      : 'chicken'
+
+    console.log('Pre-check:', pre.replace(/\n/g, ' | '))
+
+    // ── FAST PATH: fries confirmed by Haiku ──────────────────────────────────
+    if (preHasFries) {
+      const dishId = preProtein === 'fish' ? 'fish-and-chips'
+        : preProtein === 'pork' ? 'pork-chop'
+        : 'chicken-chop'
+      console.log('Pre-check → Kopitiam Western:', dishId)
+      return Response.json({ dishId, confidence: 88 })
+    }
+
+    // ── FAST PATH: drink confirmed by Haiku ──────────────────────────────────
+    if (preIsDrink) {
+      const drinkResponse = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 30,
+        messages: [{
+          role: 'user',
+          content: [
+            imageBlock,
+            {
+              type: 'text',
+              text: 'Which drink is this? Reply with exactly one: KOPI, TEH, MILO, TEH_TARIK, THAI_MILK_TEA, BANDUNG, SUGARCANE, BUBBLE_TEA',
+            },
+          ],
+        }],
+      })
+      const drinkText = drinkResponse.content[0].text.trim().toLowerCase()
+      const drinkMap = {
+        kopi: 'kopi', teh: 'teh', milo: 'milo-dinosaur',
+        teh_tarik: 'teh-tarik', thai_milk_tea: 'thai-milk-tea',
+        bandung: 'bandung', sugarcane: 'sugarcane-juice', bubble_tea: 'bubble-tea',
+      }
+      const drinkId = Object.entries(drinkMap).find(([k]) => drinkText.includes(k))?.[1] || 'kopi'
+      console.log('Pre-check → Drink:', drinkId)
+      return Response.json({ dishId: drinkId, confidence: 82 })
+    }
+
+    // ── MAIN DETECTION: full visual inventory with Opus ───────────────────────
     const response = await client.messages.create({
       model: 'claude-opus-4-7',
       max_tokens: 700,
@@ -331,9 +340,7 @@ Respond ONLY in valid JSON with this exact structure:
   "protein_g": number,
   "carbs_g": number,
   "fat_g": number,
-  "alternatives": [
-    { "dish": "string", "calories": number, "reason": "string" }
-  ],
+  "alternatives": [{ "dish": "string", "calories": number, "reason": "string" }],
   "reason": "string",
   "visual_cues": "string",
   "trap_checks": {
@@ -342,17 +349,13 @@ Respond ONLY in valid JSON with this exact structure:
     "western_veg_checked": boolean
   }
 }`,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: imageBase64 },
-            },
-            {
-              type: 'text',
-              text: `Identify this dish. Use dish names from the taxonomy and database below.
+      messages: [{
+        role: 'user',
+        content: [
+          imageBlock,
+          {
+            type: 'text',
+            text: `Identify this dish. Use dish names from the taxonomy and database below.
 
 DISH TAXONOMY:
 ${TAXONOMY_REF}
@@ -361,10 +364,9 @@ FULL DISH DATABASE:
 ${DISH_LIST}
 
 Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
-            },
-          ],
-        },
-      ],
+          },
+        ],
+      }],
     })
 
     const text = response.content[0].text.trim()
@@ -379,8 +381,7 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
 
     console.log('Visual inventory:', JSON.stringify(result.visual_inventory))
     console.log('Dish:', result.dish, '→', dishId, result.confidence + '%')
-    if (result.override_reason) console.log('Override applied:', result.override_reason)
-    if (result.trap_checks) console.log('Trap checks:', JSON.stringify(result.trap_checks))
+    if (result.override_reason) console.log('Override:', result.override_reason)
 
     return Response.json({
       dishId,
@@ -389,9 +390,6 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
   } catch (err) {
     console.error('Detection error:', err.message)
     const ids = Object.keys(DISHES)
-    return Response.json({
-      dishId: ids[Math.floor(Math.random() * ids.length)],
-      confidence: 55,
-    })
+    return Response.json({ dishId: ids[Math.floor(Math.random() * ids.length)], confidence: 55 })
   }
 }
