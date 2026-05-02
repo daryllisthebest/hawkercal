@@ -3,10 +3,11 @@ import { DISHES } from '@/lib/mockData'
 
 const DISH_TAXONOMY = {
   'Kopitiam Western': {
-    visual_signature: 'crinkle-cut fries, fried protein cutlet, brown gravy, mixed corn/carrot/pea veg, white oval plate',
+    visual_signature: 'Two variants: (A) crinkle-cut fries + fried/battered cutlet + brown gravy poured over + mixed corn/carrot/pea veg OR (B) thick wedge fries + grilled protein (char marks, no batter) + garden salad + sweet chili dip + NO gravy',
     dishes: [
-      { name: 'Chicken Chop', calories: 780, cues: 'fried chicken cutlet, crinkle fries, pepper or mushroom brown gravy' },
-      { name: 'Pork Chop', calories: 820, cues: 'pork cutlet, fries, brown sauce' },
+      { name: 'Chicken Chop', calories: 780, cues: 'fried/battered chicken cutlet (flattened), crinkle-cut fries, brown pepper or mushroom gravy poured OVER the chicken, mixed corn/carrot/pea veg on side, white oval plate' },
+      { name: 'Grilled Chicken Set', calories: 680, cues: 'grilled chicken thigh (char marks, no batter), thick wedge fries (NOT crinkle-cut), garden salad (lettuce/broccoli/cherry tomato/cucumber), sweet chili dip in separate cup, NO brown gravy on plate', differentiator: 'grilled not fried, wedge not crinkle, salad not mixed veg, NO gravy — gravy absence is the strongest Chicken Chop disqualifier' },
+      { name: 'Pork Chop', calories: 820, cues: 'pork cutlet, crinkle fries, brown sauce' },
       { name: 'Fish & Chips', calories: 710, cues: 'battered fish fillet, fries, tartar sauce' },
       { name: 'Chicken Cutlet Rice', calories: 740, cues: 'chicken cutlet on rice instead of fries' },
     ],
@@ -41,7 +42,7 @@ const DISH_TAXONOMY = {
 
 const TAXONOMY_REF = Object.entries(DISH_TAXONOMY)
   .map(([cat, data]) => {
-    const dishes = data.dishes.map(d => `    - ${d.name}: ${d.cues}`).join('\n')
+    const dishes = data.dishes.map(d => `    - ${d.name}: ${d.cues}${d.differentiator ? ` | KEY DIFFERENTIATOR: ${d.differentiator}` : ''}`).join('\n')
     return `  ${cat} [${data.visual_signature}]\n${dishes}`
   })
   .join('\n\n')
@@ -57,6 +58,9 @@ const DISH_LIST = Object.values(DISHES)
 
 const DISH_NAME_TO_ID = {
   'chicken chop': 'chicken-chop',
+  'grilled chicken set': 'chicken-chop',
+  'grilled chicken': 'chicken-chop',
+  'grilled fish set': 'fish-and-chips',
   'pork chop': 'pork-chop',
   'fish & chips': 'fish-and-chips',
   'fish and chips': 'fish-and-chips',
@@ -189,8 +193,18 @@ function applyConfidenceOverrides(result, rawText = '') {
     result.override_reason = 'Noodle dish detected but no noodles found in visual inventory'
   }
 
-  if (hasFries || hasWesternVeg) {
-    const protein = everywhere
+  // Rule 4 (must run BEFORE Rule 2): grilled protein + wedge fries → Grilled Chicken Set
+  // "wedge fries" contains "fries" so Rule 2 would incorrectly fire without this guard
+  const hasWedgeFries = starch.includes('wedge') || everywhere.includes('wedge fries') || everywhere.includes('potato wedge')
+  const hasGrilledProtein = (result.visual_inventory?.protein?.toLowerCase() || '').includes('grilled')
+
+  if (hasWedgeFries && hasGrilledProtein) {
+    result.dish = (everywhere.includes('fish') || everywhere.includes('fillet')) ? 'Grilled Fish Set' : 'Grilled Chicken Set'
+    result.category = 'Kopitiam Western'
+    result.confidence = 82
+    result.needsConfirmation = false
+    result.override_reason = 'Grilled protein + wedge fries — Western set meal, not Chicken Chop (no gravy)'
+  } else if (hasFries || hasWesternVeg) {
     if (everywhere.includes('fish') || everywhere.includes('fillet') || everywhere.includes('battered')) {
       result.dish = 'Fish & Chips'
     } else if (everywhere.includes('pork')) {
@@ -201,7 +215,7 @@ function applyConfidenceOverrides(result, rawText = '') {
     result.category = 'Kopitiam Western'
     result.confidence = 85
     result.needsConfirmation = false
-    result.override_reason = 'Fries/western veg detected — forced to Kopitiam Western'
+    result.override_reason = 'Crinkle fries/western veg detected — forced to Kopitiam Western'
   }
 
   if (result.confidence < 70) result.needsConfirmation = true
@@ -326,6 +340,18 @@ KNOWN TRAPS — you must check these:
 - Crinkle-cut fries + fried protein + brown gravy + mixed veg = Kopitiam Western (Chicken Chop, Pork Chop, Fish & Chips)
 - Green table background is irrelevant. Only judge what is on the plate.
 - Mixed corn/carrot/pea veg = Kopitiam Western side dish, not a hawker stir-fry indicator.
+
+FEW-SHOT CORRECTION EXAMPLES — learn from these past mistakes:
+
+EXAMPLE 1 — Grilled Chicken Set (commonly misidentified)
+Visual inventory: PROTEIN: grilled chicken thigh, skin-on, pepper seasoning, no batter | STARCH: thick-cut wedge fries (NOT crinkle-cut) | SAUCE: sweet chili dipping sauce in separate cup, NO gravy on plate | SIDES: garden salad — lettuce, broccoli, cherry tomatoes, cucumber, thousand island dressing | PLATING: black oval plate, casual dining or food court western stall
+→ Correct answer: Grilled Chicken Set, ~680 kcal, category: Kopitiam Western
+TRAP: If protein is GRILLED (char marks, no batter, no breading) AND there is NO brown gravy on the plate → this is Grilled Chicken Set. Chicken Chop ALWAYS has brown pepper or mushroom gravy poured directly over the chicken. Absence of gravy disqualifies Chicken Chop entirely.
+
+EXAMPLE 2 — Chicken Chop (commonly misidentified as Mee Goreng)
+Visual inventory: PROTEIN: fried chicken cutlet, flattened, battered/breaded | STARCH: crinkle-cut fries | SAUCE: brown pepper or mushroom gravy poured OVER the chicken | SIDES: mixed corn/carrot/pea vegetables | PLATING: white oval plate, kopitiam western stall
+→ Correct answer: Chicken Chop, ~780 kcal, category: Kopitiam Western
+TRAP: Brown sauce + no noodles = gravy dish (Chicken Chop, Pork Chop). NEVER a noodle dish. Mee Goreng requires visible yellow noodles — if no noodles are present, it cannot be Mee Goreng regardless of sauce colour.
 
 Respond ONLY in valid JSON with this exact structure:
 {
