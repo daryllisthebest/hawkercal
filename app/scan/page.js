@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 import { DISHES } from '@/lib/mockData'
-import { getTodayScanCount, incrementScanCount, FREE_SCAN_LIMIT, getProfile } from '@/lib/storage'
+import { getTodayScanCount, incrementScanCount, FREE_SCAN_LIMIT, getMonthlyProScanCount, incrementMonthlyProScanCount, PRO_MONTHLY_SCAN_LIMIT, getProfile } from '@/lib/storage'
 
 const TIPS = [
   'Photograph the dish from above for best results 📸',
@@ -24,7 +24,9 @@ export default function ScanPage() {
 
   const startAnalysis = async (file) => {
     if (preview) sessionStorage.setItem('lastScanPhoto', preview)
+    const profile = getProfile()
     incrementScanCount()
+    if (profile.isPro) incrementMonthlyProScanCount()
     setPhase('analyzing')
     setAnalyzeMsg('Scanning your meal…')
 
@@ -58,6 +60,10 @@ export default function ScanPage() {
   const handleFile = (file) => {
     if (!file || !file.type.startsWith('image/')) return
     const profile = getProfile()
+    if (profile.isPro && getMonthlyProScanCount() >= PRO_MONTHLY_SCAN_LIMIT) {
+      setPhase('pro-limit-reached')
+      return
+    }
     if (!profile.isPro && getTodayScanCount() >= FREE_SCAN_LIMIT) {
       setPhase('limit-reached')
       return
@@ -206,6 +212,27 @@ export default function ScanPage() {
               className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-base text-center shadow-lg shadow-orange-200 active:scale-95 transition-transform mb-3 block"
             >
               Upgrade to Pro →
+            </Link>
+            <button
+              onClick={() => setPhase('idle')}
+              className="w-full bg-white text-gray-500 py-3 rounded-2xl font-semibold text-sm border border-gray-200 active:scale-95 transition-transform"
+            >
+              Back
+            </button>
+          </div>
+        )}
+
+        {phase === 'pro-limit-reached' && (
+          <div className="flex flex-col items-center pt-10 text-center px-2">
+            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center text-4xl mb-6">📅</div>
+            <h2 className="text-2xl font-black text-gray-900 mb-2">Monthly limit reached</h2>
+            <p className="text-gray-500 text-sm mb-1">You've used all {PRO_MONTHLY_SCAN_LIMIT} Pro scans for this month.</p>
+            <p className="text-gray-400 text-xs mb-8">Resets on the 1st · You can still log meals manually from the glossary</p>
+            <Link
+              href="/glossary"
+              className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-base text-center shadow-lg shadow-orange-200 active:scale-95 transition-transform mb-3 block"
+            >
+              Browse Food Glossary →
             </Link>
             <button
               onClick={() => setPhase('idle')}

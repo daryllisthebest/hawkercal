@@ -13,7 +13,7 @@ const FREE_FEATURES = [
 ]
 
 const PRO_FEATURES = [
-  { icon: '♾️', text: 'Unlimited AI scans', highlight: true },
+  { icon: '📸', text: '100 AI scans/month (vs 3/day free)', highlight: true },
   { icon: '🧠', text: 'Weekly AI insights', highlight: true },
   { icon: '🔍', text: 'Hidden calories breakdown', highlight: true },
   { icon: '🍜', text: 'Southeast Asian food database (50+ dishes)', highlight: true },
@@ -22,7 +22,7 @@ const PRO_FEATURES = [
 ]
 
 const COMPARE = [
-  { feature: 'Daily AI scans', free: '3', pro: 'Unlimited' },
+  { feature: 'AI scans', free: '3/day', pro: '100/month' },
   { feature: 'Daily log', free: '✓', pro: '✓' },
   { feature: 'Calorie tracking', free: 'Basic', pro: 'Advanced' },
   { feature: 'Hidden calories breakdown', free: '✕', pro: '✓' },
@@ -86,7 +86,7 @@ export default function PricingPage() {
             <div className="mb-6">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Pro Plan</div>
               <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-black text-white">S$4.99</span>
+                <span className="text-6xl font-black text-white">S$9.99</span>
                 <span className="text-gray-400 font-semibold">/month</span>
               </div>
               <p className="text-xs text-gray-500 mt-2">Cancel anytime · No hidden fees</p>

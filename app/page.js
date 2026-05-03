@@ -49,7 +49,7 @@ const FLAGS = ['🇸🇬', '🇲🇾', '🇹🇭', '🇮🇩', '🇻🇳', '🇵
 
 export default function LandingPage() {
   const [annual, setAnnual] = useState(true)
-  const monthlyPro = annual ? 3.99 : 5.99
+  const monthlyPro = annual ? 7.99 : 9.99
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
