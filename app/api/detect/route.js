@@ -50,12 +50,29 @@ const TAXONOMY_REF = Object.entries(DISH_TAXONOMY)
 const DISH_LIST = Object.values(DISHES)
   .map(d => {
     const name = `${d.name}${d.nameLocal ? ` (${d.nameLocal})` : ''}`
+    const vd = d.visual_detection
+    if (vd) {
+      // Use structured visual_detection when available — more useful to the vision model
+      const ids = vd.key_identifiers?.slice(0, 4).join('; ') || ''
+      const diff = vd.differentiators ? ` | DIFF: ${vd.differentiators.slice(0, 120)}` : ''
+      return `  ${d.id}: ${name} | ${vd.protein} + ${vd.starch} + ${vd.sauce} | KEY: ${ids}${diff}`
+    }
     const desc = d.description ? d.description.slice(0, 100) : ''
     const tags = d.tags?.slice(0, 4).join(', ') || ''
     return `  ${d.id}: ${name} | ${desc} | [${tags}]`
   })
   .join('\n')
 
+// Category-specific visual reference — only the relevant slice is injected per scan
+const VISUAL_BY_CATEGORY = {}
+Object.values(DISHES).forEach(d => {
+  if (!d.visual_detection) return
+  const cat = d.tags?.[0] || 'Other'
+  if (!VISUAL_BY_CATEGORY[cat]) VISUAL_BY_CATEGORY[cat] = []
+  VISUAL_BY_CATEGORY[cat].push(
+    `  ${d.id} (${d.name}): ${d.visual_detection.key_identifiers?.join(', ')}`
+  )
+})
 const DISH_NAME_TO_ID = {
   'chicken chop': 'chicken-chop',
   'grilled chicken set': 'chicken-chop',
