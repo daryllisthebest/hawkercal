@@ -63,15 +63,65 @@ const DISH_LIST = Object.values(DISHES)
   })
   .join('\n')
 
-// Category-specific visual reference — only the relevant slice is injected per scan
-const VISUAL_BY_CATEGORY = {}
+// ── Stage-1 category → filtered dish list for Stage-2 ───────────────────────
+// Original 67 dishes have inconsistent tags; batch dishes use category as tags[0].
+// Explicit overrides for originals, tag-based fallback for batch dishes.
+const DETECTION_CAT_OVERRIDES = {
+  // Western
+  'chicken-chop': 'Western', 'fish-and-chips': 'Western', 'pork-chop': 'Western', 'fries': 'Western',
+  // Noodles
+  'char-kway-teow': 'Noodles', 'laksa': 'Noodles', 'pad-thai': 'Noodles', 'hokkien-mee': 'Noodles',
+  'mee-goreng': 'Noodles', 'bak-chor-mee': 'Noodles', 'wanton-mee': 'Noodles', 'mee-pok': 'Noodles',
+  'fishball-mee': 'Noodles', 'bee-hoon': 'Noodles', 'mee-soto': 'Noodles', 'bun-cha': 'Noodles',
+  // Rice
+  'chicken-rice': 'Rice', 'nasi-lemak': 'Rice', 'nasi-goreng': 'Rice', 'nasi-goreng-id': 'Rice',
+  'cai-png': 'Rice', 'duck-rice': 'Rice', 'char-siew-rice': 'Rice', 'com-tam': 'Rice',
+  'pad-krapow': 'Rice', 'nasi-padang': 'Rice', 'nasi-goreng-kampung': 'Rice', 'claypot-rice': 'Rice',
+  // Soup
+  'pho': 'Soup', 'pho-ga': 'Soup', 'soto-ayam': 'Soup', 'tom-yum': 'Soup',
+  'bak-kut-teh': 'Soup', 'sinigang': 'Soup', 'kare-kare': 'Soup', 'mala-hotpot': 'Soup', 'chilli-crab': 'Soup',
+  // Malay
+  'rendang': 'Malay', 'gado-gado': 'Malay', 'satay': 'Malay', 'green-curry': 'Malay', 'lontong': 'Malay',
+  'mala-xiang-guo': 'Malay', 'adobo': 'Malay', 'sisig': 'Malay', 'lechon': 'Malay',
+  // Indian/Mamak
+  'roti-prata': 'Indian/Mamak',
+  // Dim Sum/Snack
+  'you-tiao': 'Dim Sum/Snack', 'kaya-toast': 'Dim Sum/Snack', 'soft-boiled-eggs': 'Dim Sum/Snack',
+  'chwee-kueh': 'Dim Sum/Snack', 'carrot-cake': 'Dim Sum/Snack', 'chicken-wing': 'Dim Sum/Snack',
+  'sunny-side-up': 'Dim Sum/Snack', 'spring-rolls': 'Dim Sum/Snack', 'banh-mi': 'Dim Sum/Snack',
+  'lumpia-ph': 'Dim Sum/Snack', 'sio-bak': 'Dim Sum/Snack',
+  // Drink/Dessert
+  'bubble-tea': 'Drink/Dessert', 'kopi': 'Drink/Dessert', 'teh': 'Drink/Dessert',
+  'milo-dinosaur': 'Drink/Dessert', 'bandung': 'Drink/Dessert', 'sugarcane-juice': 'Drink/Dessert',
+  'teh-tarik': 'Drink/Dessert', 'thai-milk-tea': 'Drink/Dessert', 'ice-kachang': 'Drink/Dessert',
+  'chendol': 'Drink/Dessert', 'ice-cream-bread': 'Drink/Dessert', 'ondeh-ondeh': 'Drink/Dessert',
+}
+const TAG0_TO_DETECTION_CAT = {
+  Rice: 'Rice', Noodles: 'Noodles', Soup: 'Soup', Congee: 'Soup',
+  Western: 'Western', Indian: 'Indian/Mamak', Malay: 'Malay',
+  'Dim Sum': 'Dim Sum/Snack', Snack: 'Dim Sum/Snack',
+  Drink: 'Drink/Dessert', Dessert: 'Drink/Dessert',
+}
+
+const DISH_LIST_BY_CAT = {}
 Object.values(DISHES).forEach(d => {
-  if (!d.visual_detection) return
-  const cat = d.tags?.[0] || 'Other'
-  if (!VISUAL_BY_CATEGORY[cat]) VISUAL_BY_CATEGORY[cat] = []
-  VISUAL_BY_CATEGORY[cat].push(
-    `  ${d.id} (${d.name}): ${d.visual_detection.key_identifiers?.join(', ')}`
-  )
+  const cat = DETECTION_CAT_OVERRIDES[d.id] || TAG0_TO_DETECTION_CAT[d.tags?.[0]] || 'Rice'
+  if (!DISH_LIST_BY_CAT[cat]) DISH_LIST_BY_CAT[cat] = []
+  const name = `${d.name}${d.nameLocal ? ` (${d.nameLocal})` : ''}`
+  const vd = d.visual_detection
+  let entry
+  if (vd) {
+    const ids = vd.key_identifiers?.slice(0, 4).join('; ') || ''
+    const diff = vd.differentiators ? ` | DIFF: ${vd.differentiators.slice(0, 120)}` : ''
+    entry = `  ${d.id}: ${name} | ${vd.protein} + ${vd.starch} + ${vd.sauce} | KEY: ${ids}${diff}`
+  } else {
+    const desc = d.description ? d.description.slice(0, 100) : ''
+    entry = `  ${d.id}: ${name} | ${desc}`
+  }
+  DISH_LIST_BY_CAT[cat].push(entry)
+})
+Object.keys(DISH_LIST_BY_CAT).forEach(cat => {
+  DISH_LIST_BY_CAT[cat] = DISH_LIST_BY_CAT[cat].join('\n')
 })
 const DISH_NAME_TO_ID = {
   'chicken chop': 'chicken-chop',
@@ -260,7 +310,6 @@ const DISH_NAME_TO_ID = {
   'chicken rice': 'chicken-rice',
   'nasi lemak': 'nasi-lemak',
   'nasi goreng': 'nasi-goreng',
-  'biryani': 'biryani',
   'duck rice': 'duck-rice',
   'roast duck rice': 'duck-rice',
   'char siew rice': 'char-siew-rice',
@@ -281,7 +330,6 @@ const DISH_NAME_TO_ID = {
   'rendang': 'rendang',
   'satay': 'satay',
   'roti prata': 'roti-prata',
-  'murtabak': 'murtabak',
   'lontong': 'lontong',
   'gado gado': 'gado-gado',
   'green curry': 'green-curry',
@@ -416,50 +464,53 @@ export async function POST(request) {
   const imageBlock = { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } }
 
   try {
-    // ── PRE-CHECK (Haiku, ~10 tokens) ────────────────────────────────────────
-    // Binary gate: settle FOOD vs DRINK and fries presence before spending Opus tokens
+    // ── STAGE 1 (Haiku): visual inventory + category classification ──────────
     const preCheckResponse = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 60,
+      max_tokens: 100,
       messages: [{
         role: 'user',
         content: [
           imageBlock,
           {
             type: 'text',
-            text: `Answer these three questions with one word each:
-1. Is this solid FOOD on a plate/bowl, or a DRINK in a cup/glass/can? → FOOD or DRINK
-2. Are crinkle-cut fries or potato chips visible on the plate? → YES or NO
-3. Main protein (if food): CHICKEN, PORK, FISH, or OTHER
+            text: `Examine this food image. Build a quick visual inventory then classify.
 
-Reply in this exact format (no other text):
-TYPE: FOOD
-FRIES: NO
-PROTEIN: OTHER`,
+STARCH: white rice | fried rice | noodles | fries | roti/flatbread | none
+PROTEIN: chicken | pork | fish | egg | tofu | prawns | other
+LIQUID: broth | curry | gravy | none
+
+Select ONE category:
+Rice → rice base, no noodles
+Noodles → noodles visible (yellow, flat, vermicelli)
+Soup → broth-heavy dish or congee/porridge
+Western → fries present (any type) or western cutlet plate
+Indian/Mamak → thosai/roti/murtabak/briyani/curry with bread
+Malay → satay/rendang/rojak/otah/malay kuih
+Dim Sum/Snack → dumplings/bao/dim sum/small kuih/snacks
+Drink/Dessert → any beverage or sweet dessert
+
+Reply format (no other text):
+STARCH: [value]
+PROTEIN: [value]
+LIQUID: [value]
+CATEGORY: [category]`,
           },
         ],
       }],
     })
 
     const pre = preCheckResponse.content[0].text.trim()
-    const preIsDrink = pre.includes('TYPE: DRINK')
-    const preHasFries = pre.includes('FRIES: YES')
-    const preProtein = pre.includes('PROTEIN: FISH') ? 'fish'
-      : pre.includes('PROTEIN: PORK') ? 'pork'
+    const detectedCategory = pre.match(/CATEGORY:\s*(.+)/i)?.[1]?.trim() || null
+    const preProteinLine = pre.match(/PROTEIN:\s*(.+)/i)?.[1]?.toLowerCase().trim() || ''
+    const preIsDrink = detectedCategory === 'Drink/Dessert'
+    const preProtein = preProteinLine.includes('fish') ? 'fish'
+      : preProteinLine.includes('pork') ? 'pork'
       : 'chicken'
 
-    console.log('Pre-check:', pre.replace(/\n/g, ' | '))
+    console.log('Stage 1:', pre.replace(/\n/g, ' | '), '→ cat:', detectedCategory)
 
-    // ── FAST PATH: fries confirmed by Haiku ──────────────────────────────────
-    if (preHasFries) {
-      const dishId = preProtein === 'fish' ? 'fish-and-chips'
-        : preProtein === 'pork' ? 'pork-chop'
-        : 'chicken-chop'
-      console.log('Pre-check → Kopitiam Western:', dishId)
-      return Response.json({ dishId, confidence: 88 })
-    }
-
-    // ── FAST PATH: drink confirmed by Haiku ──────────────────────────────────
+    // ── FAST PATH: drink ─────────────────────────────────────────────────────
     if (preIsDrink) {
       const drinkResponse = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
@@ -482,7 +533,7 @@ PROTEIN: OTHER`,
         bandung: 'bandung', sugarcane: 'sugarcane-juice', bubble_tea: 'bubble-tea',
       }
       const drinkId = Object.entries(drinkMap).find(([k]) => drinkText.includes(k))?.[1] || 'kopi'
-      console.log('Pre-check → Drink:', drinkId)
+      console.log('Stage 1 → Drink fast path:', drinkId)
       return Response.json({ dishId: drinkId, confidence: 82 })
     }
 
@@ -556,13 +607,13 @@ Respond ONLY in valid JSON with this exact structure:
           imageBlock,
           {
             type: 'text',
-            text: `Identify this dish. Use dish names from the taxonomy and database below.
+            text: `Identify this dish. Category pre-classified as: ${detectedCategory || 'unknown'}.
 
 DISH TAXONOMY:
 ${TAXONOMY_REF}
 
-FULL DISH DATABASE:
-${DISH_LIST}
+CANDIDATE DISHES (${detectedCategory || 'all'} — ${(DISH_LIST_BY_CAT[detectedCategory] ?? DISH_LIST).split('\n').length} dishes):
+${DISH_LIST_BY_CAT[detectedCategory] ?? DISH_LIST}
 
 Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
           },
