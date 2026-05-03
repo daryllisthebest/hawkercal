@@ -10,6 +10,132 @@ import MacroBar from '@/components/MacroBar'
 import { DISHES, getMealForTime, MEAL_TYPES } from '@/lib/mockData'
 import { addEntry, getTodayStr, getCustomDishes } from '@/lib/storage'
 
+function DebugPanel() {
+  const [debug, setDebug] = useState(null)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('hawkercal_debug')
+      if (raw) setDebug(JSON.parse(raw))
+    } catch {}
+  }, [])
+
+  if (!debug) return null
+
+  const s1 = debug.stage1
+  const s2 = debug.stage2
+
+  return (
+    <div className="mx-4 mb-6 rounded-2xl overflow-hidden border border-gray-700 bg-gray-950 font-mono text-xs">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-900 transition-colors"
+      >
+        <span className="text-green-400 font-bold tracking-tight">🔬 Debug — raw model output</span>
+        <span className="text-gray-500 text-[10px]">{open ? '▲ collapse' : '▼ expand'}</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-gray-800 px-4 pb-4 space-y-4 max-h-[70vh] overflow-y-auto">
+
+          {/* Stage 1 */}
+          <div className="pt-3">
+            <div className="text-yellow-400 mb-2 uppercase tracking-widest text-[10px]">Stage 1 · Haiku · Category classifier</div>
+            <div className="space-y-0.5">
+              <Row label="category" value={s1?.category} highlight />
+              <Row label="starch" value={s1?.starch} />
+              <Row label="protein" value={s1?.protein} />
+              <Row label="liquid" value={s1?.liquid} />
+            </div>
+            {s1?.raw && (
+              <details className="mt-2">
+                <summary className="text-gray-600 cursor-pointer hover:text-gray-400">raw response</summary>
+                <pre className="mt-1 text-gray-500 whitespace-pre-wrap break-words">{s1.raw}</pre>
+              </details>
+            )}
+          </div>
+
+          {/* Stage 2 */}
+          {s2 ? (
+            <div>
+              <div className="text-yellow-400 mb-2 uppercase tracking-widest text-[10px]">Stage 2 · {s2.model} · Detection</div>
+              <div className="space-y-0.5">
+                <Row label="dish" value={s2.dish} highlight />
+                <Row label="category" value={s2.category} />
+                <Row label="confidence" value={`${s2.confidence}%`} highlight={s2.confidence < 70} />
+                <Row label="resolved_id" value={debug.resolved_id} />
+              </div>
+
+              {s2.override_reason && (
+                <div className="mt-2 px-2 py-1.5 bg-red-950 border border-red-800 rounded-lg text-red-400">
+                  ⚡ override: {s2.override_reason}
+                </div>
+              )}
+
+              {s2.visual_inventory && (
+                <div className="mt-3">
+                  <div className="text-gray-500 mb-1">visual_inventory</div>
+                  <div className="pl-2 space-y-0.5 border-l border-gray-800">
+                    {Object.entries(s2.visual_inventory).map(([k, v]) => (
+                      <Row key={k} label={k} value={v} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {s2.trap_checks && (
+                <div className="mt-3">
+                  <div className="text-gray-500 mb-1">trap_checks</div>
+                  <div className="pl-2 space-y-0.5 border-l border-gray-800">
+                    {Object.entries(s2.trap_checks).map(([k, v]) => (
+                      <div key={k} className={`${v ? 'text-green-400' : 'text-red-400'}`}>
+                        {v ? '✓' : '✗'} {k}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {s2.alternatives?.length > 0 && (
+                <div className="mt-3">
+                  <div className="text-gray-500 mb-1">alternatives</div>
+                  <div className="pl-2 space-y-1 border-l border-gray-800">
+                    {s2.alternatives.map((a, i) => (
+                      <div key={i} className="text-gray-400">
+                        <span className="text-white">{a.dish}</span> · {a.calories} kcal
+                        {a.reason && <div className="text-gray-600 text-[10px]">{a.reason}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {s2.reason && (
+                <div className="mt-3">
+                  <div className="text-gray-500 mb-1">reason</div>
+                  <div className="text-gray-400 pl-2 border-l border-gray-800 break-words">{s2.reason}</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-blue-400">fast path: {debug.fast_path} (no Stage 2 call)</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Row({ label, value, highlight }) {
+  return (
+    <div className="flex gap-2">
+      <span className="text-gray-600 shrink-0 w-28">{label}:</span>
+      <span className={highlight ? 'text-orange-300 font-bold' : 'text-gray-300'}>{value ?? '—'}</span>
+    </div>
+  )
+}
+
 function QuestionBlock({ question, answer, onSingle, onMulti }) {
   const isMulti = question.type === 'multi'
   const selected = isMulti ? (answer || []) : answer
@@ -359,6 +485,7 @@ function ResultContent() {
 
       </div>
 
+      <DebugPanel />
       <BottomNav />
     </div>
   )

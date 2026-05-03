@@ -502,12 +502,15 @@ CATEGORY: [category]`,
 
     const pre = preCheckResponse.content[0].text.trim()
     const detectedCategory = pre.match(/CATEGORY:\s*(.+)/i)?.[1]?.trim() || null
-    const preProteinLine = pre.match(/PROTEIN:\s*(.+)/i)?.[1]?.toLowerCase().trim() || ''
+    const preStarch = pre.match(/STARCH:\s*(.+)/i)?.[1]?.trim() || ''
+    const preProteinLine = pre.match(/PROTEIN:\s*(.+)/i)?.[1]?.trim() || ''
+    const preLiquid = pre.match(/LIQUID:\s*(.+)/i)?.[1]?.trim() || ''
     const preIsDrink = detectedCategory === 'Drink/Dessert'
-    const preProtein = preProteinLine.includes('fish') ? 'fish'
-      : preProteinLine.includes('pork') ? 'pork'
+    const preProtein = preProteinLine.toLowerCase().includes('fish') ? 'fish'
+      : preProteinLine.toLowerCase().includes('pork') ? 'pork'
       : 'chicken'
 
+    const stage1Debug = { category: detectedCategory, starch: preStarch, protein: preProteinLine, liquid: preLiquid, raw: pre }
     console.log('Stage 1:', pre.replace(/\n/g, ' | '), '→ cat:', detectedCategory)
 
     // ── FAST PATH: drink ─────────────────────────────────────────────────────
@@ -534,7 +537,7 @@ CATEGORY: [category]`,
       }
       const drinkId = Object.entries(drinkMap).find(([k]) => drinkText.includes(k))?.[1] || 'kopi'
       console.log('Stage 1 → Drink fast path:', drinkId)
-      return Response.json({ dishId: drinkId, confidence: 82 })
+      return Response.json({ dishId: drinkId, confidence: 82, _debug: { stage1: stage1Debug, stage2: null, fast_path: 'drink', resolved_id: drinkId } })
     }
 
     // ── MAIN DETECTION: Haiku (free) or Opus (Pro) ───────────────────────────
@@ -638,6 +641,22 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
     return Response.json({
       dishId,
       confidence: Math.min(99, Math.max(40, result.confidence)),
+      _debug: {
+        stage1: stage1Debug,
+        stage2: {
+          model: mainModel,
+          dish: result.dish,
+          category: result.category,
+          confidence: result.confidence,
+          visual_inventory: result.visual_inventory,
+          trap_checks: result.trap_checks,
+          alternatives: result.alternatives,
+          reason: result.reason,
+          visual_cues: result.visual_cues,
+          override_reason: result.override_reason || null,
+        },
+        resolved_id: dishId,
+      },
     })
   } catch (err) {
     console.error('Detection error:', err.message)

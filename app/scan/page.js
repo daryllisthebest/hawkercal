@@ -45,9 +45,10 @@ export default function ScanPage() {
         body: formData,
         headers: profile.isPro ? { 'x-user-tier': 'pro' } : {},
       })
-      const { dishId, confidence } = await res.json()
+      const { dishId, confidence, _debug } = await res.json()
 
       msgTimers.forEach(clearTimeout)
+      try { sessionStorage.setItem('hawkercal_debug', JSON.stringify(_debug ?? null)) } catch {}
       router.push(`/result?dish=${dishId}&confidence=${confidence}`)
     } catch {
       msgTimers.forEach(clearTimeout)
