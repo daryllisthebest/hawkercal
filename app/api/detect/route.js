@@ -547,7 +547,7 @@ CATEGORY: [category]`,
 
     const response = await client.messages.create({
       model: mainModel,
-      max_tokens: 700,
+      max_tokens: 1500,
       system: `You are an expert Southeast Asian hawker food identifier specialising in Singapore and Malaysia cuisine.
 
 STEP 1 — VISUAL INVENTORY (do this before naming any dish):
@@ -558,6 +558,7 @@ STEP 1 — VISUAL INVENTORY (do this before naming any dish):
 - PLATING: How served (white oval plate, bowl with broth, banana leaf, claypot...)
 
 STEP 2 — MATCH TO DISH using your inventory. Do NOT guess the dish first then justify it.
+You must only return dish names that exist exactly in the DISH_LIST provided. Do not invent or approximate dish names.
 
 KNOWN TRAPS — you must check these:
 - If STARCH is not noodles, you CANNOT return a noodle dish (Mee Goreng, Laksa, Hokkien Mee, etc.)
@@ -580,6 +581,7 @@ TRAP: Brown sauce + no noodles = gravy dish (Chicken Chop, Pork Chop). NEVER a n
 
 Respond ONLY in valid JSON with this exact structure:
 {
+  "thinking": "string — 2-3 sentences: what you see in the image, which dish it most closely matches and why, before naming it",
   "visual_inventory": {
     "protein": "string",
     "starch": "string",
