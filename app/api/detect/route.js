@@ -474,16 +474,17 @@ export async function POST(request) {
           imageBlock,
           {
             type: 'text',
-            text: `Examine this food image. Build a quick visual inventory then classify.
+            text: `Examine this food image. Focus on the PRIMARY dish in the largest/central bowl or plate. Ignore side bowls, condiment dishes, and background items at the edges of the frame.
 
+Build a quick visual inventory of the PRIMARY dish only:
 STARCH: white rice | fried rice | noodles | fries | roti/flatbread | none
 PROTEIN: chicken | pork | fish | egg | tofu | prawns | other
 LIQUID: broth | curry | gravy | none
 
 Select ONE category:
-Rice → rice base, no noodles
+Rice → rice is the base of the main dish (not a side bowl)
 Noodles → noodles visible (yellow, flat, vermicelli)
-Soup → broth-heavy dish or congee/porridge
+Soup → broth-heavy dish, meat/ribs submerged in liquid, or congee/porridge
 Western → fries present (any type) or western cutlet plate
 Indian/Mamak → thosai/roti/murtabak/briyani/curry with bread
 Malay → satay/rendang/rojak/otah/malay kuih
@@ -566,6 +567,8 @@ KNOWN TRAPS — you must check these:
 - Crinkle-cut fries + fried protein + brown gravy + mixed veg = Kopitiam Western (Chicken Chop, Pork Chop, Fish & Chips)
 - Green table background is irrelevant. Only judge what is on the plate.
 - Mixed corn/carrot/pea veg = Kopitiam Western side dish, not a hawker stir-fry indicator.
+- Clear or pale-yellow broth + large pork ribs submerged in a bowl = Bak Kut Teh. This is NEVER duck rice or any rice dish even if a side bowl of rice is visible nearby.
+- A side bowl of rice at the edge of frame does NOT make the main dish a rice dish. Judge by what is in the central bowl.
 
 FEW-SHOT CORRECTION EXAMPLES — learn from these past mistakes:
 
