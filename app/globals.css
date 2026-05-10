@@ -16,7 +16,18 @@ body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* HawkerCal sections */
+body:not(:has(.sportsim-root)) {
   background-color: #fffbf5;
+}
+
+/* Ad slot placeholder styling */
+.ad-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }

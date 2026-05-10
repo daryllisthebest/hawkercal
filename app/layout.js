@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
         {/* PWA Service Worker */}
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="min-h-screen bg-orange-50 font-sans antialiased">
+      <body className="font-sans antialiased">
         {children}
         <InstallPrompt />
         <PWARegister />
