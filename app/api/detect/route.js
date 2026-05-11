@@ -483,13 +483,13 @@ LIQUID: broth | curry | gravy | none
 
 Select ONE category:
 Rice → rice is the base of the main dish (not a side bowl)
-Noodles → noodles visible (yellow, flat, vermicelli)
+Noodles → noodles visible (yellow, flat, vermicelli) — noodles may be hidden under toppings; look for strands peeking out at the edges
 Soup → broth-heavy dish, meat/ribs submerged in liquid, or congee/porridge
 Western → fries present (any type) or western cutlet plate
 Indian/Mamak → thosai/roti/murtabak/briyani/curry with bread
 Malay → satay/rendang/rojak/otah/malay kuih
 Dim Sum/Snack → dumplings/bao/dim sum/small kuih/snacks
-Drink/Dessert → any beverage or sweet dessert
+Drink/Dessert → any beverage or sweet dessert — ONLY if no meat, fish, or savoury protein is present. Round white balls in a savoury dish are fishballs (→ Noodles or Soup), NOT dessert.
 
 Reply format (no other text):
 STARCH: [value]
@@ -569,6 +569,8 @@ KNOWN TRAPS — you must check these:
 - Mixed corn/carrot/pea veg = Kopitiam Western side dish, not a hawker stir-fry indicator.
 - Clear or pale-yellow broth + large pork ribs submerged in a bowl = Bak Kut Teh. This is NEVER duck rice or any rice dish even if a side bowl of rice is visible nearby.
 - A side bowl of rice at the edge of frame does NOT make the main dish a rice dish. Judge by what is in the central bowl.
+- Round smooth white balls in a savoury bowl = fishballs. This is NEVER a dessert (Bubur Cha Cha, Tang Yuan, etc.). Fishballs appear with noodles or in broth; dessert balls are in sweet coconut milk and the bowl contains no meat or noodles.
+- If minced pork, fish cake, or any savoury meat is visible, the dish CANNOT be a dessert.
 
 FEW-SHOT CORRECTION EXAMPLES — learn from these past mistakes:
 
