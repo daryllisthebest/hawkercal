@@ -584,9 +584,34 @@ Visual inventory: PROTEIN: fried chicken cutlet, flattened, battered/breaded | S
 → Correct answer: Chicken Chop, ~780 kcal, category: Kopitiam Western
 TRAP: Brown sauce + no noodles = gravy dish (Chicken Chop, Pork Chop). NEVER a noodle dish. Mee Goreng requires visible yellow noodles — if no noodles are present, it cannot be Mee Goreng regardless of sauce colour.
 
+Break the dish into individual ingredients with their own calorie contribution. For Chicken Chop, return separate entries for: fried chicken cutlet, crinkle fries, gravy, and mixed vegetables. Each ingredient must have its own calorie estimate. The sum of all ingredient calories must equal calories_total within 5%.
+
 Respond ONLY in valid JSON with this exact structure:
 {
   "thinking": "string — 2-3 sentences: what you see in the image, which dish it most closely matches and why, before naming it",
+  "dish": "string",
+  "category": "string",
+  "confidence": number,
+  "needsConfirmation": boolean,
+  "calories_total": number,
+  "protein_g": number,
+  "carbs_g": number,
+  "fat_g": number,
+  "ingredients": [
+    {
+      "id": "string",
+      "name": "string",
+      "type": "protein | starch | sauce | sides | drink",
+      "emoji": "string",
+      "weight_g": number,
+      "calories": number,
+      "protein_g": number,
+      "carbs_g": number,
+      "fat_g": number,
+      "confidence": number,
+      "description": "string"
+    }
+  ],
   "visual_inventory": {
     "protein": "string",
     "starch": "string",
@@ -594,22 +619,13 @@ Respond ONLY in valid JSON with this exact structure:
     "sides": "string",
     "plating": "string"
   },
-  "dish": "string",
-  "category": "string",
-  "confidence": number,
-  "needsConfirmation": boolean,
-  "calories": number,
-  "protein_g": number,
-  "carbs_g": number,
-  "fat_g": number,
   "alternatives": [{ "dish": "string", "calories": number, "reason": "string" }],
-  "reason": "string",
-  "visual_cues": "string",
   "trap_checks": {
     "noodle_dish_has_noodles": boolean,
     "background_ignored": boolean,
     "western_veg_checked": boolean
-  }
+  },
+  "reason": "string"
 }`,
       messages: [{
         role: 'user',
@@ -648,6 +664,8 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
     return Response.json({
       dishId,
       confidence: Math.min(99, Math.max(40, result.confidence)),
+      ingredients: result.ingredients ?? [],
+      calories_total: result.calories_total ?? result.calories ?? null,
       _debug: {
         stage1: stage1Debug,
         stage2: {
@@ -659,7 +677,6 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
           trap_checks: result.trap_checks,
           alternatives: result.alternatives,
           reason: result.reason,
-          visual_cues: result.visual_cues,
           override_reason: result.override_reason || null,
         },
         resolved_id: dishId,
