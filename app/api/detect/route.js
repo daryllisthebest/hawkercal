@@ -74,6 +74,7 @@ const DETECTION_CAT_OVERRIDES = {
   'mee-goreng': 'Noodles', 'bak-chor-mee': 'Noodles', 'wanton-mee': 'Noodles', 'mee-pok': 'Noodles',
   'fishball-mee': 'Noodles', 'bee-hoon': 'Noodles', 'mee-soto': 'Noodles', 'bun-cha': 'Noodles',
   // Rice
+  'lu-rou-fan': 'Rice',
   'chicken-rice': 'Rice', 'nasi-lemak': 'Rice', 'nasi-goreng': 'Rice', 'nasi-goreng-id': 'Rice',
   'cai-png': 'Rice', 'duck-rice': 'Rice', 'char-siew-rice': 'Rice', 'com-tam': 'Rice',
   'pad-krapow': 'Rice', 'nasi-padang': 'Rice', 'nasi-goreng-kampung': 'Rice', 'claypot-rice': 'Rice',
@@ -312,6 +313,9 @@ const DISH_NAME_TO_ID = {
   'nasi goreng': 'nasi-goreng',
   'duck rice': 'duck-rice',
   'roast duck rice': 'duck-rice',
+  'lu rou fan': 'lu-rou-fan',
+  'braised pork rice': 'lu-rou-fan',
+  'taiwanese braised pork rice': 'lu-rou-fan',
   'char siew rice': 'char-siew-rice',
   'char siu rice': 'char-siew-rice',
   'soy sauce chicken rice': 'soy-sauce-chicken-rice',
