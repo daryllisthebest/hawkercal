@@ -586,6 +586,8 @@ KNOWN TRAPS — you must check these:
 - A side bowl of rice at the edge of frame does NOT make the main dish a rice dish. Judge by what is in the central bowl.
 - Round smooth white balls in a savoury bowl = fishballs. This is NEVER a dessert (Bubur Cha Cha, Tang Yuan, etc.). Fishballs appear with noodles or in broth; dessert balls are in sweet coconut milk and the bowl contains no meat or noodles.
 - If minced pork, fish cake, or any savoury meat is visible, the dish CANNOT be a dessert.
+- A heavily stained/messy bowl with orange residue but little food remaining is NOT a sign of low calories — it indicates a chili-sauce dish that has mostly been eaten. Do not under-estimate just because the bowl looks "empty-ish."
+- Two-bowl setups (one main dish bowl + one small soup bowl) are extremely common in Singapore hawker dining. Always check for a second bowl in frame before finalizing a single-dish detection.
 
 FEW-SHOT CORRECTION EXAMPLES — learn from these past mistakes:
 
@@ -599,6 +601,33 @@ Visual inventory: PROTEIN: fried chicken cutlet, flattened, battered/breaded | S
 → Correct answer: Chicken Chop, ~780 kcal, category: Kopitiam Western
 TRAP: Brown sauce + no noodles = gravy dish (Chicken Chop, Pork Chop). NEVER a noodle dish. Mee Goreng requires visible yellow noodles — if no noodles are present, it cannot be Mee Goreng regardless of sauce colour.
 
+EXAMPLE 7 — Mee Pok Dry + Fishball Soup (partially eaten, messy bowl)
+Visual inventory:
+  PROTEIN: fishcake/dumpling visible at bottom of main bowl, partially eaten
+  STARCH: flat yellow noodles, significant portion remaining (~60% of original)
+  SAUCE: bowl rim and interior heavily stained orange/red from chili sauce —
+         sauce remnants visible even where noodles have been eaten
+  SIDES: spring onion flecks, soup spoon resting in bowl
+  PLATING: TWO bowls visible — main noodle bowl (stained, partially eaten)
+           and smaller side bowl with clear broth and fishballs
+
+Correct dish: Mee Pok Dry + Fishball Soup
+Total calories: ~540 kcal (full portion) — but ADJUST for visible
+remaining quantity
+
+CRITICAL RULE for partially eaten food:
+1. Estimate calories based on what is VISIBLE, not the assumed full
+   portion. If ~60% of noodles remain, calculate: base_calories ×
+   (visible_portion / 1.0)
+2. Set a field "portion_eaten_estimate": number (0-100, percentage
+   already consumed)
+3. Stained/empty bowl areas indicate food WAS there — use this to
+   estimate the ORIGINAL portion size, then apply the remaining
+   percentage
+4. Set needsConfirmation: true whenever portion_eaten_estimate > 20,
+   since the user may want to log what they actually ate vs the
+   full dish
+
 Break the dish into individual ingredients with their own calorie contribution. For Chicken Chop, return separate entries for: fried chicken cutlet, crinkle fries, gravy, and mixed vegetables. Each ingredient must have its own calorie estimate. The sum of all ingredient calories must equal calories_total within 5%.
 
 Respond ONLY in valid JSON with this exact structure:
@@ -608,6 +637,7 @@ Respond ONLY in valid JSON with this exact structure:
   "category": "string",
   "confidence": number,
   "needsConfirmation": boolean,
+  "portion_eaten_estimate": number,
   "calories_total": number,
   "protein_g": number,
   "carbs_g": number,
@@ -679,6 +709,8 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
     return Response.json({
       dishId,
       confidence: Math.min(99, Math.max(40, result.confidence)),
+      needsConfirmation: result.needsConfirmation ?? false,
+      portionEatenEstimate: result.portion_eaten_estimate ?? 0,
       ingredients: result.ingredients ?? [],
       calories_total: result.calories_total ?? result.calories ?? null,
       _debug: {
@@ -693,6 +725,7 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
           alternatives: result.alternatives,
           reason: result.reason,
           override_reason: result.override_reason || null,
+          portion_eaten_estimate: result.portion_eaten_estimate ?? null,
         },
         resolved_id: dishId,
       },
