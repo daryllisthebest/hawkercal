@@ -454,6 +454,33 @@ function applyConfidenceOverrides(result, rawText = '') {
 
   if (result.confidence < 70) result.needsConfirmation = true
 
+  // Rule 6: Partial/eaten portion detection
+  if (result.portion_eaten_estimate && result.portion_eaten_estimate > 20) {
+    const remainingRatio = (100 - result.portion_eaten_estimate) / 100
+    result.calories_total = Math.round(result.calories_total * remainingRatio)
+    result.needsConfirmation = true
+    result.override_reason =
+      `Detected ~${result.portion_eaten_estimate}% already eaten — ` +
+      `calories adjusted to reflect visible remaining portion`
+
+    // Adjust each ingredient proportionally too
+    if (result.ingredients) {
+      result.ingredients.forEach(ing => {
+        ing.calories = Math.round(ing.calories * remainingRatio)
+      })
+    }
+  }
+
+  // Rule 7: Multi-bowl detection
+  const bowlMentions = (result.visual_inventory?.plating?.toLowerCase()
+    .match(/bowl/g) || []).length
+  if (bowlMentions >= 2 && !result.isCombo) {
+    result.isCombo = true
+    result.needsConfirmation = true
+    result.override_reason =
+      'Multiple bowls detected — likely a main dish + soup side combo'
+  }
+
   return result
 }
 
@@ -711,6 +738,7 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
       confidence: Math.min(99, Math.max(40, result.confidence)),
       needsConfirmation: result.needsConfirmation ?? false,
       portionEatenEstimate: result.portion_eaten_estimate ?? 0,
+      isCombo: result.isCombo ?? false,
       ingredients: result.ingredients ?? [],
       calories_total: result.calories_total ?? result.calories ?? null,
       _debug: {
