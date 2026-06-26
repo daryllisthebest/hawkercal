@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/user/hawkercal/.claude/merge-to-main.sh",
+            "timeout": 60,
+            "statusMessage": "Committing and merging to main..."
+          }
+        ]
+      }
+    ]
+  }
+}
