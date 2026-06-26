@@ -318,6 +318,42 @@ function WrongDishPanel({ alternatives, debug, originalDishId, ingredients, conf
   )
 }
 
+function DebugSection({ title, color, children }) {
+  return (
+    <div>
+      <div className={`${color} font-bold uppercase tracking-widest text-[10px] mb-2`}>{title}</div>
+      <div className="space-y-1.5">{children}</div>
+    </div>
+  )
+}
+
+function DebugRow({ k, v, highlight }) {
+  return (
+    <div className="flex gap-2">
+      <span className="text-gray-600 w-36 shrink-0">{k}:</span>
+      <span className={highlight ? 'text-orange-300 font-bold' : 'text-gray-300'}>{v == null ? '—' : String(v)}</span>
+    </div>
+  )
+}
+
+function DebugPre({ label, value, maxLines, collapsed: initCollapsed = false }) {
+  const [open, setOpen] = useState(!initCollapsed)
+  const lines = (value || '').split('\n')
+  const shown = maxLines ? lines.slice(0, maxLines).join('\n') + (lines.length > maxLines ? `\n… (${lines.length - maxLines} more lines)` : '') : value
+  return (
+    <div>
+      <button onClick={() => setOpen(o => !o)} className="text-gray-600 hover:text-gray-400 text-[10px] mb-1">
+        {label} {open ? '▲' : '▼'}
+      </button>
+      {open && (
+        <pre className="bg-gray-900 rounded p-2 text-gray-300 whitespace-pre-wrap break-words text-[10px] max-h-48 overflow-y-auto">
+          {shown}
+        </pre>
+      )}
+    </div>
+  )
+}
+
 function DebugPanel({ debug }) {
   const [open, setOpen] = useState(false)
   if (!debug) return null
@@ -391,6 +427,9 @@ function ResultContent() {
   const [logged, setLogged] = useState(false)
   const [scanPhoto, setScanPhoto] = useState(null)
   const [debug, setDebug] = useState(null)
+  const [deepDebug, setDeepDebug] = useState(null)
+  const [deepDebugOpen, setDeepDebugOpen] = useState(false)
+  const [deepDebugLoading, setDeepDebugLoading] = useState(false)
 
   const cardRefs = useRef({})
 
@@ -428,6 +467,25 @@ function ResultContent() {
       if (ref) ref.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [highlightedId])
+
+  const fetchDeepDebug = useCallback(async () => {
+    const photo = sessionStorage.getItem('lastScanPhoto')
+    if (!photo) { setDeepDebug({ error: 'No scan photo found in session. Take a fresh scan first.' }); setDeepDebugOpen(true); return }
+    setDeepDebugLoading(true)
+    setDeepDebugOpen(true)
+    try {
+      const blob = await fetch(photo).then(r => r.blob())
+      const form = new FormData()
+      form.append('image', blob, 'photo.jpg')
+      const res = await fetch('/api/detect-debug', { method: 'POST', body: form })
+      const data = await res.json()
+      setDeepDebug(data)
+    } catch (e) {
+      setDeepDebug({ error: e.message })
+    } finally {
+      setDeepDebugLoading(false)
+    }
+  }, [])
 
   const totalCalories = useMemo(() => {
     if (!ingredients.length) return dish.baseCalories
@@ -664,6 +722,83 @@ function ResultContent() {
         <DebugPanel debug={debug} />
 
       </div>
+
+      {/* Floating debug button — scanPhoto is only set client-side so safe to render */}
+      {scanPhoto && (
+        <button
+          onClick={fetchDeepDebug}
+          className="fixed top-4 right-4 z-50 bg-gray-900 text-green-400 text-[10px] font-mono font-bold px-2.5 py-1.5 rounded-lg border border-gray-700 shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+        >
+          🔬 Debug
+        </button>
+      )}
+
+      {/* Deep debug modal */}
+      {deepDebugOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex flex-col" onClick={() => setDeepDebugOpen(false)}>
+          <div
+            className="flex-1 overflow-y-auto m-3 mt-12 rounded-2xl bg-gray-950 border border-gray-700 font-mono text-[11px]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="sticky top-0 flex items-center justify-between px-4 py-3 bg-gray-950 border-b border-gray-800">
+              <span className="text-green-400 font-bold">🔬 Full Detection Debug</span>
+              <button onClick={() => setDeepDebugOpen(false)} className="text-gray-500 text-xs hover:text-white">✕ close</button>
+            </div>
+            {deepDebugLoading && (
+              <div className="px-4 py-8 text-center text-gray-400 text-xs">Re-running detection on stored photo…</div>
+            )}
+            {deepDebug && !deepDebugLoading && (
+              <div className="px-4 pb-6 space-y-5 pt-4">
+                {deepDebug.error ? (
+                  <div className="text-red-400">{deepDebug.error}</div>
+                ) : (<>
+                  <DebugSection title="Stage 1 — Category classifier" color="text-yellow-400">
+                    <DebugRow k="detected_category" v={deepDebug.stage1_detected_category} highlight />
+                    <DebugRow k="tokens_used" v={deepDebug.stage1_tokens_used} />
+                    <DebugPre label="raw_response" value={deepDebug.stage1_raw_response} />
+                  </DebugSection>
+
+                  <DebugSection title="Stage 2 — Dish identifier inputs" color="text-blue-400">
+                    <DebugRow k="model" v={deepDebug.stage2_model} />
+                    <DebugRow k="dish_count" v={deepDebug.stage2_dish_count} />
+                    <DebugRow k="tokens_used" v={deepDebug.stage2_tokens_used} />
+                    <DebugPre label="dish_list_sent" value={deepDebug.stage2_dish_list_sent} maxLines={30} />
+                    <DebugPre label="system_prompt_sent" value={deepDebug.stage2_system_prompt_sent} maxLines={20} collapsed />
+                  </DebugSection>
+
+                  <DebugSection title="Stage 2 — Raw model output" color="text-purple-400">
+                    <DebugPre label="stage2_raw_response" value={deepDebug.stage2_raw_response} />
+                  </DebugSection>
+
+                  <DebugSection title="Post-processing overrides" color="text-orange-400">
+                    {deepDebug.overrides_applied?.length === 0
+                      ? <div className="text-gray-600 italic">No overrides fired</div>
+                      : deepDebug.overrides_applied?.map((o, i) => (
+                        <div key={i} className="border-l-2 border-orange-600 pl-3 py-1 space-y-0.5">
+                          <div className="text-orange-300 font-bold">{o.rule}</div>
+                          <div className="text-gray-300">{o.action}</div>
+                        </div>
+                      ))
+                    }
+                  </DebugSection>
+
+                  <DebugSection title="Final result" color="text-green-400">
+                    {Object.entries(deepDebug.final_result || {}).filter(([k]) => k !== 'ingredients' && k !== 'visual_inventory' && k !== 'alternatives' && k !== 'thinking').map(([k, v]) => (
+                      <DebugRow key={k} k={k} v={typeof v === 'object' ? JSON.stringify(v) : v} highlight={k === 'dishId' || k === 'dish' || k === 'confidence'} />
+                    ))}
+                    {deepDebug.final_result?.visual_inventory && (
+                      <DebugPre label="visual_inventory" value={JSON.stringify(deepDebug.final_result.visual_inventory, null, 2)} />
+                    )}
+                    {deepDebug.final_result?.thinking && (
+                      <DebugPre label="thinking" value={deepDebug.final_result.thinking} />
+                    )}
+                  </DebugSection>
+                </>)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Sticky log button — sits above BottomNav */}
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 pointer-events-none">
