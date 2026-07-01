@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { DISHES } from '@/lib/mockData'
+import { estimateFood } from '@/lib/estimateFood'
 
 const DISH_TAXONOMY = {
   'Kopitiam Western': {
@@ -506,6 +507,16 @@ export async function POST(request) {
   const imageBlock = { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } }
 
   try {
+    // ── ESTIMATE: component-level breakdown (Opus) ─────────────────────────────
+    let estimate = null
+    try {
+      const { estimate: est, tokensUsed: estTokens } = await estimateFood(imageBase64, mediaType)
+      estimate = est
+      console.log('Estimate tokens:', estTokens)
+    } catch (estErr) {
+      console.warn('Estimate failed, continuing with detection only:', estErr.message)
+    }
+
     // ── STAGE 1 (Haiku): visual inventory + category classification ──────────
     const preCheckResponse = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -713,6 +724,14 @@ ${TAXONOMY_REF}
 CANDIDATE DISHES (${detectedCategory || 'all'} — ${(DISH_LIST_BY_CAT[detectedCategory] ?? DISH_LIST).split('\n').length} dishes):
 ${DISH_LIST_BY_CAT[detectedCategory] ?? DISH_LIST}
 
+${estimate ? `COMPONENT ANALYSIS (from estimate):
+Greeting: ${estimate.greeting}
+Visual inventory: ${JSON.stringify(estimate.visual_inventory)}
+Components: ${estimate.components?.map(c => `${c.emoji} ${c.name} (${c.weight_g}g, ${c.calories} cal)`).join('; ') || 'none'}
+Total estimate: ${estimate.calories_total} kcal (range: ${estimate.calories_range?.min}-${estimate.calories_range?.max})
+Suggested dishes: ${estimate.dish_suggestion}${estimate.dish_alternatives?.length ? ` | alternatives: ${estimate.dish_alternatives.join(', ')}` : ''}
+Caveat: ${estimate.estimation_note}
+` : ''}
 Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
           },
         ],
@@ -741,6 +760,7 @@ Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`,
       isCombo: result.isCombo ?? false,
       ingredients: result.ingredients ?? [],
       calories_total: result.calories_total ?? result.calories ?? null,
+      estimate: estimate || null,
       _debug: {
         stage1: stage1Debug,
         stage2: {
