@@ -354,6 +354,74 @@ function DebugPre({ label, value, maxLines, collapsed: initCollapsed = false }) 
   )
 }
 
+function ComponentsPanel({ estimate }) {
+  if (!estimate?.components?.length) return null
+  return (
+    <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white">
+      <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-200">
+        <div className="text-sm font-bold text-gray-800">🔍 Visual Components</div>
+        <div className="text-xs text-gray-600 mt-0.5">
+          {estimate.greeting}
+        </div>
+      </div>
+      <div className="divide-y divide-gray-100">
+        {estimate.components.map((comp, i) => (
+          <div key={i} className="px-4 py-3 flex gap-3 hover:bg-gray-50 transition-colors">
+            <div className="text-2xl">{comp.emoji}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-gray-800 text-sm">{comp.name}</div>
+              <div className="text-xs text-gray-600 mt-0.5 line-clamp-2">{comp.description}</div>
+              <div className="flex gap-4 mt-2 text-xs">
+                <span className="text-gray-700"><span className="font-bold">{comp.weight_g}g</span></span>
+                <span className="text-orange-600 font-bold">{comp.calories} kcal</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-16 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        comp.confidence >= 80 ? 'bg-green-500' : comp.confidence >= 60 ? 'bg-yellow-500' : 'bg-red-400'
+                      }`}
+                      style={{ width: `${comp.confidence}%` }}
+                    />
+                  </div>
+                  <span className="text-gray-600 w-8">{comp.confidence}%</span>
+                </div>
+              </div>
+              {comp.notes && <div className="text-[10px] text-gray-500 italic mt-1.5">{comp.notes}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 space-y-2">
+        <div className="flex justify-between text-sm font-bold text-gray-800">
+          <span>Total:</span>
+          <span className="text-orange-600">{estimate.calories_total} kcal</span>
+        </div>
+        {estimate.calories_range && (
+          <div className="text-xs text-gray-600">
+            Range: {estimate.calories_range.min}–{estimate.calories_range.max} kcal
+            {estimate.calories_range.notes && <div className="italic mt-1">{estimate.calories_range.notes}</div>}
+          </div>
+        )}
+        {estimate.dish_suggestion && (
+          <div className="text-xs pt-2 border-t border-gray-200">
+            <span className="text-gray-600">Model suggests: </span>
+            <span className="font-bold text-gray-800">{estimate.dish_suggestion}</span>
+            {estimate.dish_confidence && <span className="text-gray-500"> ({estimate.dish_confidence}%)</span>}
+            {estimate.dish_alternatives?.length > 0 && (
+              <div className="text-gray-600 mt-1">Or: {estimate.dish_alternatives.join(', ')}</div>
+            )}
+          </div>
+        )}
+        {estimate.estimation_note && (
+          <div className="text-[10px] bg-orange-50 border border-orange-200 text-orange-800 p-2 rounded italic">
+            ⚠️ {estimate.estimation_note}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function DebugPanel({ debug }) {
   const [open, setOpen] = useState(false)
   if (!debug) return null
@@ -427,6 +495,7 @@ function ResultContent() {
   const [logged, setLogged] = useState(false)
   const [scanPhoto, setScanPhoto] = useState(null)
   const [debug, setDebug] = useState(null)
+  const [estimate, setEstimate] = useState(null)
   const [deepDebug, setDeepDebug] = useState(null)
   const [deepDebugOpen, setDeepDebugOpen] = useState(false)
   const [deepDebugLoading, setDeepDebugLoading] = useState(false)
@@ -440,6 +509,9 @@ function ResultContent() {
 
       const rawDebug = sessionStorage.getItem('hawkercal_debug')
       if (rawDebug) setDebug(JSON.parse(rawDebug))
+
+      const rawEstimate = sessionStorage.getItem('hawkercal_estimate')
+      if (rawEstimate) setEstimate(JSON.parse(rawEstimate))
 
       const rawIng = sessionStorage.getItem('hawkercal_ingredients')
       if (rawIng) {
@@ -651,6 +723,9 @@ function ResultContent() {
             <MacroBox label="Fat"     value={totalMacros.fat}     color="#f97316" />
           </div>
         </div>
+
+        {/* Components panel */}
+        {estimate && <ComponentsPanel estimate={estimate} />}
 
         {/* Ingredient list */}
         {ingredients.length > 0 && (
