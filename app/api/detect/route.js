@@ -2,6 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 import { DISHES } from '@/lib/mockData'
 import { estimateFood } from '@/lib/estimateFood'
 
+if (typeof process !== 'undefined') {
+  console.log('[detect/route] API key present at startup:', !!process.env.ANTHROPIC_API_KEY)
+}
+
 const DISH_TAXONOMY = {
   'Kopitiam Western': {
     visual_signature: 'Two variants: (A) crinkle-cut fries + fried/battered cutlet + brown gravy poured over + mixed corn/carrot/pea veg OR (B) thick wedge fries + grilled protein (char marks, no batter) + garden salad + sweet chili dip + NO gravy',
@@ -486,10 +490,13 @@ function applyConfidenceOverrides(result, rawText = '') {
 }
 
 export async function POST(request) {
+  console.log('[detect POST] Checking API key...', !!process.env.ANTHROPIC_API_KEY)
   if (!process.env.ANTHROPIC_API_KEY) {
+    console.warn('[detect POST] ANTHROPIC_API_KEY is missing! Returning random dish.')
     const ids = Object.keys(DISHES)
     return Response.json({ dishId: ids[Math.floor(Math.random() * ids.length)], confidence: 72 })
   }
+  console.log('[detect POST] API key present, proceeding...')
 
   let imageBase64, mediaType
   try {

@@ -1,6 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { DISHES } from '@/lib/mockData'
 
+if (typeof process !== 'undefined') {
+  console.log('[detect-debug/route] API key present at startup:', !!process.env.ANTHROPIC_API_KEY)
+}
+
 // ── Rebuild the same constants as detect/route.js ────────────────────────────
 
 const DISH_TAXONOMY = {
@@ -321,9 +325,12 @@ Respond ONLY in valid JSON with this exact structure:
 }`
 
 export async function POST(request) {
+  console.log('[detect-debug POST] Checking API key...', !!process.env.ANTHROPIC_API_KEY)
   if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('[detect-debug POST] ANTHROPIC_API_KEY is missing!')
     return Response.json({ error: 'No API key — debug endpoint requires ANTHROPIC_API_KEY' }, { status: 503 })
   }
+  console.log('[detect-debug POST] API key present, proceeding...')
 
   let imageBase64, mediaType
   try {
