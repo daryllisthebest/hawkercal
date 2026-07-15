@@ -45,14 +45,13 @@ export default function ScanPage() {
         body: formData,
         headers: profile.isPro ? { 'x-user-tier': 'pro' } : {},
       })
-      const { dishId, confidence, _debug, estimate, ingredients, calories_total } = await res.json()
+      const data = await res.json()
+      const estimate = data.estimate
 
       msgTimers.forEach(clearTimeout)
-      try { sessionStorage.setItem('hawkercal_debug', JSON.stringify(_debug ?? null)) } catch {}
       try { sessionStorage.setItem('hawkercal_estimate', JSON.stringify(estimate ?? null)) } catch {}
-      try { sessionStorage.setItem('hawkercal_ingredients', JSON.stringify(ingredients ?? [])) } catch {}
-      try { sessionStorage.setItem('hawkercal_calories_total', String(calories_total ?? '')) } catch {}
-      router.push(`/result?dish=${dishId}&confidence=${confidence}`)
+      try { sessionStorage.setItem('hawkercal_calories_total', String(estimate?.calories_total ?? '')) } catch {}
+      router.push('/result')
     } catch {
       msgTimers.forEach(clearTimeout)
       const ids = Object.keys(DISHES)
