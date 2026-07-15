@@ -31,8 +31,8 @@ export default function ScanPage() {
     setAnalyzeMsg('Scanning your meal…')
 
     const msgTimers = [
-      setTimeout(() => setAnalyzeMsg('Identifying dish type…'), 1200),
-      setTimeout(() => setAnalyzeMsg('Calculating calories…'), 2800),
+      setTimeout(() => setAnalyzeMsg('Analyzing components…'), 1200),
+      setTimeout(() => setAnalyzeMsg('Estimating calories…'), 2800),
     ]
 
     try {
@@ -146,7 +146,7 @@ export default function ScanPage() {
               <h2 className="text-xl font-black text-gray-900 mb-2">Snap Your Meal</h2>
               <p className="text-gray-500 text-sm mb-5">
                 Take a new photo or choose one from your gallery.<br />
-                <span className="font-semibold text-orange-600">AI identifies the dish instantly.</span>
+                <span className="font-semibold text-orange-600">AI breaks down components and estimates calories.</span>
               </p>
 
               <div className="flex gap-3 justify-center">
