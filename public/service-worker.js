@@ -63,11 +63,10 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           if (response.ok) {
-            const cache = caches.open(API_CACHE).then(c => {
+            caches.open(API_CACHE).then(c => {
               c.put(request, response.clone())
-              return response
-            })
-            return cache
+            }).catch(() => {})
+            return response
           }
           return response
         })
