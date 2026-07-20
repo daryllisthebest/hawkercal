@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hawkercal-v1'
+const CACHE_NAME = 'hawkercal-v2'
 const STATIC_ASSETS = [
   '/',
   '/offline',
@@ -7,8 +7,8 @@ const STATIC_ASSETS = [
   '/icons/icon.svg',
 ]
 
-const DYNAMIC_CACHE = 'hawkercal-dynamic-v1'
-const API_CACHE = 'hawkercal-api-v1'
+const DYNAMIC_CACHE = 'hawkercal-dynamic-v2'
+const API_CACHE = 'hawkercal-api-v2'
 
 // Install event: cache essential assets
 self.addEventListener('install', (event) => {
