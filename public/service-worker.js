@@ -62,15 +62,19 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          if (!response) {
+            console.error('[SW] Fetch returned null response for', url.pathname)
+            return new Response('API Error: null response', { status: 500 })
+          }
           if (response.ok) {
             caches.open(API_CACHE).then(c => {
               c.put(request, response.clone())
             }).catch(() => {})
-            return response
           }
           return response
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('[SW] Fetch error for', url.pathname, ':', error.message)
           return caches.match(request).then((cached) => {
             return cached || new Response('Offline - API unavailable', { status: 503 })
           })
