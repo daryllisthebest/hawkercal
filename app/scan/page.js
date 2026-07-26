@@ -24,9 +24,7 @@ export default function ScanPage() {
 
   const startAnalysis = async (file) => {
     if (preview) sessionStorage.setItem('lastScanPhoto', preview)
-    const profile = getProfile()
-    incrementScanCount()
-    if (profile.isPro) incrementMonthlyProScanCount()
+
     setPhase('analyzing')
     setAnalyzeMsg('Scanning your meal…')
 
@@ -57,6 +55,10 @@ export default function ScanPage() {
       }
 
       const estimate = data.estimate
+
+      // Only increment count after successful API call
+      incrementScanCount()
+      if (profile.isPro) incrementMonthlyProScanCount()
 
       msgTimers.forEach(clearTimeout)
       try { sessionStorage.setItem('hawkercal_estimate', JSON.stringify(estimate ?? null)) } catch {}
