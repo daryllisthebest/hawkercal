@@ -45,18 +45,28 @@ export default function ScanPage() {
         body: formData,
         headers: profile.isPro ? { 'x-user-tier': 'pro' } : {},
       })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || `API error: ${res.status}`)
+      }
+
       const data = await res.json()
+      if (!data.estimate) {
+        throw new Error('No estimate in response')
+      }
+
       const estimate = data.estimate
 
       msgTimers.forEach(clearTimeout)
       try { sessionStorage.setItem('hawkercal_estimate', JSON.stringify(estimate ?? null)) } catch {}
       try { sessionStorage.setItem('hawkercal_calories_total', String(estimate?.calories_total ?? '')) } catch {}
       router.push('/result')
-    } catch {
+    } catch (error) {
       msgTimers.forEach(clearTimeout)
-      const ids = Object.keys(DISHES)
-      const dishId = ids[Math.floor(Math.random() * ids.length)]
-      router.push(`/result?dish=${dishId}&confidence=60`)
+      console.error('[scan] Analysis failed:', error.message)
+      setPhase('error')
+      setAnalyzeMsg(`Error: ${error.message}`)
     }
   }
 
@@ -310,6 +320,30 @@ export default function ScanPage() {
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {phase === 'error' && (
+          <div className="flex flex-col items-center pt-10 text-center px-4">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center text-4xl mb-6">⚠️</div>
+            <h2 className="text-2xl font-black text-gray-900 mb-3">Scan Failed</h2>
+            <p className="text-gray-600 text-sm mb-8 bg-red-50 rounded-lg p-4 font-mono text-xs">{analyzeMsg}</p>
+            <button
+              onClick={() => {
+                setPhase('idle')
+                setPreview(null)
+                setPendingFile(null)
+              }}
+              className="w-full bg-orange-500 text-white py-3 rounded-2xl font-semibold active:scale-95 transition-transform mb-2"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => setPhase('idle')}
+              className="w-full bg-white text-gray-500 py-3 rounded-2xl font-semibold border border-gray-200 active:scale-95 transition-transform"
+            >
+              Back
+            </button>
           </div>
         )}
 
