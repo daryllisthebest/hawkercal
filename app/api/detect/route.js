@@ -6,9 +6,7 @@ if (typeof process !== 'undefined') {
 
 const SYSTEM_PROMPT = `You are a calorie estimator specialising in Singapore and Malaysia hawker food.
 
-Your job is to analyze a food photo and break it into components, estimating calories for each.
-
-IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Your entire response must be parseable as JSON.
+CRITICAL: Return ONLY the JSON object. No markdown code blocks. No backticks. No explanation. Just the raw JSON object.
 
 {
   "what_i_see": "Describe everything on the plate in one sentence. E.g. 'A large breaded fried chicken cutlet with french fries, buttered toast, baked beans and tomato sauce'",
@@ -34,8 +32,9 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Your entire resp
   "honest_note": "Oil absorption in frying may add 50-150 kcal depending on cooking method"
 }
 
+Do NOT add markdown backticks. Do NOT explain. Return only the JSON object above.
+
 Rules:
-- Return ONLY JSON, nothing else
 - Never include dish names as the primary result
 - If food is partially eaten, estimate what remains visible
 - For mixed plates, treat each component separately
@@ -93,14 +92,24 @@ export async function POST(request) {
     const text = response.content[0].text.trim()
     console.log('[detect POST] Response text length:', text.length)
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      console.error('[detect POST] No JSON found in response. First 200 chars:', text.substring(0, 200))
-      throw new Error('No JSON in response')
+    // Try to extract JSON from markdown code blocks first
+    let jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
+    let jsonText = jsonMatch ? jsonMatch[1] : null
+
+    // Fall back to simple regex if no markdown code blocks
+    if (!jsonText) {
+      jsonMatch = text.match(/\{[\s\S]*\}/)
+      jsonText = jsonMatch ? jsonMatch[0] : null
+    }
+
+    if (!jsonText) {
+      console.error('[detect POST] No JSON found in response.')
+      console.error('[detect POST] First 500 chars:', text.substring(0, 500))
+      throw new Error('Claude did not return valid JSON. Response: ' + text.substring(0, 100))
     }
 
     console.log('[detect POST] Found JSON, parsing...')
-    const estimate = JSON.parse(jsonMatch[0])
+    const estimate = JSON.parse(jsonText)
     console.log('[detect POST] Parsed estimate:', {
       what_i_see: estimate.what_i_see?.substring(0, 50) + '...',
       components_count: estimate.components?.length,
