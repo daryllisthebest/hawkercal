@@ -12,6 +12,45 @@ const TIPS = [
   'Capture the full plate in frame for better accuracy 🍽️',
 ]
 
+// Normalize any image format (HEIC, WEBP, PNG, etc.) to JPEG via canvas.
+// This avoids server-side format issues, since Claude's vision API only
+// supports jpeg/png/gif/webp, and iPhone photos are often HEIC.
+function normalizeToJpeg(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        canvas.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(url)
+            if (!blob) {
+              reject(new Error('Failed to convert image'))
+              return
+            }
+            resolve(new File([blob], 'photo.jpg', { type: 'image/jpeg' }))
+          },
+          'image/jpeg',
+          0.9
+        )
+      } catch (err) {
+        URL.revokeObjectURL(url)
+        reject(err)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load image for conversion'))
+    }
+    img.src = url
+  })
+}
+
 export default function ScanPage() {
   const router = useRouter()
   const cameraRef = useRef(null)
@@ -34,8 +73,17 @@ export default function ScanPage() {
     ]
 
     try {
+      let uploadFile = file
+      try {
+        uploadFile = await normalizeToJpeg(file)
+        console.log('[scan] Converted image to JPEG:', uploadFile.size, 'bytes')
+      } catch (convErr) {
+        console.error('[scan] Image conversion failed, using original file:', convErr.message)
+        uploadFile = file
+      }
+
       const formData = new FormData()
-      formData.append('image', file)
+      formData.append('image', uploadFile)
 
       const profile = getProfile()
       const res = await fetch('/api/detect', {

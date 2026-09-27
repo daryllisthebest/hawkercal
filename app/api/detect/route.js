@@ -61,7 +61,15 @@ export async function POST(request) {
 
     const buffer = await imageFile.arrayBuffer()
     const base64 = Buffer.from(buffer).toString('base64')
-    const mediaType = imageFile.type || 'image/jpeg'
+    let mediaType = imageFile.type || 'image/jpeg'
+
+    // Claude's vision API only supports these formats. iPhone photos are
+    // often HEIC/HEIF which will fail — normalize the type or reject clearly.
+    const SUPPORTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!SUPPORTED_TYPES.includes(mediaType)) {
+      console.warn('[detect POST] Unsupported media type received:', mediaType, '— falling back to image/jpeg')
+      mediaType = 'image/jpeg'
+    }
 
     console.log('[detect POST] Image converted to base64:', base64.length, 'chars, type:', mediaType)
 
@@ -125,9 +133,15 @@ export async function POST(request) {
       },
     })
   } catch (error) {
-    console.error('[detect POST] Error:', error.message, error.stack?.substring(0, 200))
+    console.error('[detect POST] Error name:', error?.name)
+    console.error('[detect POST] Error message:', error?.message)
+    console.error('[detect POST] Error status:', error?.status)
+    console.error('[detect POST] Error stack:', error?.stack?.substring(0, 500))
+    try {
+      console.error('[detect POST] Error full:', JSON.stringify(error, Object.getOwnPropertyNames(error)).substring(0, 1000))
+    } catch {}
     return Response.json(
-      { error: error.message || 'Estimation failed' },
+      { error: error?.message || 'Estimation failed' },
       { status: 500 }
     )
   }

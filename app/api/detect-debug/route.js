@@ -58,7 +58,13 @@ export async function POST(request) {
 
     const buffer = await imageFile.arrayBuffer()
     const base64 = Buffer.from(buffer).toString('base64')
-    const mediaType = imageFile.type || 'image/jpeg'
+    let mediaType = imageFile.type || 'image/jpeg'
+
+    const SUPPORTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!SUPPORTED_TYPES.includes(mediaType)) {
+      console.warn('[detect-debug POST] Unsupported media type received:', mediaType, '— falling back to image/jpeg')
+      mediaType = 'image/jpeg'
+    }
 
     const client = new Anthropic()
     const response = await client.messages.create({
@@ -108,9 +114,14 @@ export async function POST(request) {
       },
     })
   } catch (error) {
-    console.error('[detect-debug POST] Error:', error.message)
+    console.error('[detect-debug POST] Error name:', error?.name)
+    console.error('[detect-debug POST] Error message:', error?.message)
+    console.error('[detect-debug POST] Error status:', error?.status)
+    try {
+      console.error('[detect-debug POST] Error full:', JSON.stringify(error, Object.getOwnPropertyNames(error)).substring(0, 1000))
+    } catch {}
     return Response.json(
-      { error: error.message || 'Estimation failed' },
+      { error: error?.message || 'Estimation failed' },
       { status: 500 }
     )
   }
