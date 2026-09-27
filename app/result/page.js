@@ -31,16 +31,26 @@ export default function ResultPage() {
   const handleSave = () => {
     if (!estimate) return
 
+    const mainComponent = estimate.components?.[0]
+    const displayName = dishName || estimate.what_i_see || mainComponent?.name || 'Meal'
+
     addEntry({
       date: getTodayStr(),
-      timestamp: Date.now(),
+      name: displayName,
+      emoji: mainComponent?.emoji || '🍽️',
+      calories: estimate.calories_total,
+      macros: {
+        protein: estimate.protein_g || 0,
+        carbs: estimate.carbs_g || 0,
+        fat: estimate.fat_g || 0,
+        fiber: 0,
+      },
       estimate,
       dishName: dishName || null,
-      totalCalories: estimate.calories_total,
       components: estimate.components,
     })
     setSaved(true)
-    setTimeout(() => router.push('/home'), 1500)
+    setTimeout(() => router.push('/log'), 1500)
   }
 
   if (!estimate) {
